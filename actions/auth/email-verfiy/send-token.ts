@@ -8,9 +8,6 @@ async function sendNewToken(emailData: {
     from_name?: "ShopQuest"
 }) {
 
-    // console.log(emailData.verifyLink);
-
-
     const transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {

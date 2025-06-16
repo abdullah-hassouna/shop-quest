@@ -38,9 +38,7 @@ export const login = async (values: { email: string, password: string }) => {
         };
     }
 
-    console.log(typeof user.emailVerified)
-
-    if (user!.emailVerified) {
+    if (user.emailVerified === null) {
         await sendNewToken(email, user.name as string);
         return {
             error: "Email not validated. Validation token created.",

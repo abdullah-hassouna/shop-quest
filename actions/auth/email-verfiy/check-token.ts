@@ -10,7 +10,6 @@ async function checkToken(email: string, token: string): Promise<boolean> {
         }
     })
 
-    console.log(email, token)
     if (tokenRecord) {
         if (tokenRecord.expires < new Date()) {
             console.log("Token has expired");

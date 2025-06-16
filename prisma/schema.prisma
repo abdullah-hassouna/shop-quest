@@ -64,14 +64,38 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+model Category {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  icon        String?   @default("https://example.com/default-icon.png") // Default icon URL
+  color       String?   @default("#000000") // Default color
+  slug        String    @unique
+  products    Product[]
+  createdAt   DateTime  @default(now())
+}
+
+model Image {
+  id        String   @id @default(uuid())
+  url       String
+  alt       String?
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id])
+  createdAt DateTime @default(now())
+}
+
 model Product {
   id          String      @id @default(uuid())
   name        String
   price       Float
   description String?
+  imagesId    Image[]
+  categoryId  String?
+  category    Category?   @relation(fields: [categoryId], references: [id])
   seller      User        @relation(fields: [sellerId], references: [id])
   sellerId    String
   orders      OrderItem[]
+  tags        Tag[]       @relation("ProductTags")
   createdAt   DateTime    @default(now())
 }
 
@@ -92,7 +116,7 @@ model OrderItem {
   product   Product @relation(fields: [productId], references: [id])
   productId String
   quantity  Int     @default(1)
-  price     Float // Snapshot at purchase time
+  price     Float
 }
 
 model Notification {
@@ -102,4 +126,10 @@ model Notification {
   message   String
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
+}
+
+model Tag {
+  id       String    @id @default(uuid())
+  name     String    @unique
+  products Product[] @relation("ProductTags")
 }
