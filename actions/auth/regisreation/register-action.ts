@@ -2,8 +2,8 @@
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { signUpValidationSchema } from "@/validation/auth-validation";
-import sendNewToken from "../create-token";
-import createNewToken from "../create-token";
+import sendNewToken from "../token/create-token";
+import createNewToken from "../token/create-token";
 
 export const register = async (values: { fullname: string, email: string, password: string, }) => {
     let validatedFields = values;

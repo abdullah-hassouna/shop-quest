@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma";
 import { randomBytes } from 'crypto';
-import sendNewToken from "./email-verfiy/send-token";
+import sendNewToken from "../email-verfiy/send-token";
 
 
 async function createNewToken(email: string, fullname: string): Promise<void> {

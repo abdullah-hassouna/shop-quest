@@ -5,11 +5,12 @@ import { logInValidationSchema, } from '@/validation/auth-validation';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import clsx from 'clsx';
 import { login } from '@/actions/auth/regisreation/login-action';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
+import { toast } from 'sonner';
+import clsx from 'clsx';
 
-const LogInForm = ({ isSignUp, toggleForm, routerHook }: { isSignUp: boolean, toggleForm: MouseEventHandler<HTMLButtonElement>, routerHook: AppRouterInstance }) => (
+const LogInForm = ({ toggleForm, routerHook }: { toggleForm: MouseEventHandler<HTMLButtonElement>, routerHook: AppRouterInstance }) => (
     <div>
         <Formik
             initialValues={{ email: '', password: '' }}
@@ -17,9 +18,18 @@ const LogInForm = ({ isSignUp, toggleForm, routerHook }: { isSignUp: boolean, to
             onSubmit={async (values, { setSubmitting }) => {
                 setSubmitting(true)
                 const { success, error, redirect } = await login(values);
-                alert(success || error);
+                if (success) {
+                    toast('Login Success', {
+                        duration: 5000,
+                    });
+                } else {
+                    toast('Login Failed', {
+                        description: error,
+                        duration: 5000,
+                    });
+                }
                 if (redirect) {
-                    routerHook.push(redirect);
+                    setTimeout(() => routerHook.push(redirect), 5000)
                 }
                 setSubmitting(false)
             }}
@@ -82,14 +92,14 @@ const LogInForm = ({ isSignUp, toggleForm, routerHook }: { isSignUp: boolean, to
 
                     <div className=' mt-4 sm:mt-5 flex items-center justify-center'>
                         <p className='text-base sm:text-lg lg:text-xl text-gray-600'>
-                            {isSignUp ? 'Already a member?' : "Don't have an account?"}
+                            Don't have an account?
                         </p>
                         <span
                             // variant='link'
                             className='text-base sm:text-lg lg:text-xl mx-2 text-gray-500 cursor-pointer'
                             onClick={toggleForm}
                         >
-                            {isSignUp ? 'Sign in' : 'Sign up'}
+                            Log In
                         </span>
                     </div>
                 </form>

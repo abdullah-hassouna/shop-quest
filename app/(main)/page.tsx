@@ -7,25 +7,17 @@ import { getCatalogryWithProducts } from '@/actions/products/get-category-with-p
 
 import ProductCatalog from '@/components/ProductCategory';
 import { Toaster } from '@/components/ui/sonner';
-// import { ICatalog } from '@/types/catalog';
-// import { IProductsEntity } from 'oneentry/dist/products/productsInterfaces';
+import getUserSession from '@/actions/auth/regisreation/getUserSession';
 
 export default function HomePage() {
-  const [products, setProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    getUserSession()
     const getData = async () => {
       const { categories } = await getCatalogryWithProducts();
-
       setCategories(categories || []);
-      if (categories) {
-        const transformedCatalogs = categories.map((catalog: any) => ([
-          ...(catalog.products),
-        ]));
-        setProducts(transformedCatalogs);
-      }
       setIsLoading(false);
     };
     getData();

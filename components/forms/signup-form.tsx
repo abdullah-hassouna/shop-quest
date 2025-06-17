@@ -9,7 +9,7 @@ import clsx from 'clsx';
 import { register } from '@/actions/auth/regisreation/register-action';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 
-const SignUpForm = ({ isSignUp, toggleForm, routerHook }: { isSignUp: boolean, toggleForm: MouseEventHandler<HTMLButtonElement>, routerHook: AppRouterInstance }) => (
+const SignUpForm = ({ toggleForm, routerHook }: { toggleForm: MouseEventHandler<HTMLButtonElement>, routerHook: AppRouterInstance }) => (
     <div>
         <Formik
             initialValues={{ fullname: '', email: '', password: '', confirmPassword: '' }}
@@ -116,14 +116,14 @@ const SignUpForm = ({ isSignUp, toggleForm, routerHook }: { isSignUp: boolean, t
 
                     <div className=' mt-4 sm:mt-5 flex items-center justify-center'>
                         <p className='text-base sm:text-lg lg:text-xl text-gray-600'>
-                            {isSignUp ? 'Already a member?' : "Don't have an account?"}
+                            Already a member?
                         </p>
                         <span
                             // variant='link'
                             className='text-base sm:text-lg lg:text-xl mx-2 text-gray-500 cursor-pointer'
                             onClick={toggleForm}
                         >
-                            {isSignUp ? 'Sign in' : 'Sign up'}
+                            Sign up
                         </span>
                     </div>
                 </form>

@@ -18,7 +18,7 @@ export const getRelatedProducts = async (product: ProductInterface) => {
             take: 10, // limit results
         });
 
-        console.log(relatedProducts)
+        // console.log(relatedProducts)
 
         return {
             relatedProducts,

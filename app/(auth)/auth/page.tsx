@@ -1,7 +1,8 @@
 'use client'
 
-import LogInForm from "@/app/forms/login-form";
-import SignUpForm from "@/app/forms/signup-form";
+import LogInForm from "@/components/forms/login-form";
+import SignUpForm from "@/components/forms/signup-form";
+import { Toaster } from "@/components/ui/sonner";
 import { ChevronLeft } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect } from "react";
@@ -30,6 +31,7 @@ export default function AuthPage() {
     }
     return (
         <div className="flex min-h-screen mt-7 ">
+            <Toaster />
             <div className="w-full max-w-3xl mx-auto flex flex-col p-3">
                 <div className="mb-8 lg:mb-12 cursor-pointer" onClick={() => router.push("/")}>
                     <ChevronLeft className="text-gray-500 h-6 w-6 sm:h-8 sm:w-8 border-2 rounded-full p-1" />
@@ -45,8 +47,8 @@ export default function AuthPage() {
                     </p>
                 </div>
 
-                {isSignUp ? <SignUpForm routerHook={router} isSignUp={isSignUp} toggleForm={toggleForm} />
-                    : <LogInForm routerHook={router} isSignUp={isSignUp} toggleForm={toggleForm} />}
+                {isSignUp ? <SignUpForm routerHook={router} toggleForm={toggleForm} />
+                    : <LogInForm routerHook={router} toggleForm={toggleForm} />}
             </div>
         </div>
     )

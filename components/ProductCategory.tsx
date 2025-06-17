@@ -1,12 +1,9 @@
 import React from 'react';
-import ProductCard from './ProductCard';
 import { ProductInterface } from '@/types/product-type';
 import EmblaCarousel from './Carousel/ProductsEmblaCarousel';
 import { EmblaOptionsType } from 'embla-carousel'
 import type { Category } from '@prisma/client';
 import clsx from 'clsx';
-// import { IProduct } from '@/types/product';
-// import { IProductsEntity } from 'oneentry/dist/products/productsInterfaces';
 
 const ProductCatalog = ({
     title,
@@ -17,7 +14,7 @@ const ProductCatalog = ({
     category?: Category;
     products: ProductInterface[];
 }) => {
-    const OPTIONS: EmblaOptionsType = { slidesToScroll: 'auto' }
+    const OPTIONS: EmblaOptionsType = { slidesToScroll: 'auto', loop: true }
     const SLIDES = Array.from(products)
 
     if (products?.length === 0) {

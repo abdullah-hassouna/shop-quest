@@ -1,5 +1,13 @@
 import { PrismaClient } from '@prisma/client'
+import { faker } from '@faker-js/faker'
+import bcrypt from 'bcryptjs';
 const prisma = new PrismaClient()
+
+// Helper to generate Placeholder API URLs based on a keyword
+// const placeholderImage = (keyword: string, i: number) => `https://placehold.co/600x600?text=${encodeURIComponent(keyword)}+${i + 1}`;
+
+// Helper to generate Pexels image URLs based on a keyword
+const placeholderImage = (keyword: string, i: number) => `https://images.pexels.com/photos/${1000000 + (i * 10)}/pexels-photo-${1000000 + (i * 10)}.jpeg?auto=compress&w=600&q=80&fit=crop&h=600&text=${encodeURIComponent(keyword)}`;
 
 // Helper to get tag connectOrCreate array
 const getTagConnect = (tagNames: string[]) => tagNames.map((name: string) => ({
@@ -7,7 +15,24 @@ const getTagConnect = (tagNames: string[]) => tagNames.map((name: string) => ({
     create: { name },
 }));
 
+// 1. Clear all data before seeding (safe for dev)
+async function clearAllData() {
+    await prisma.notification.deleteMany();
+    await prisma.orderItem.deleteMany();
+    await prisma.order.deleteMany();
+    await prisma.product.deleteMany();
+    await prisma.image.deleteMany();
+    await prisma.category.deleteMany();
+    await prisma.tag.deleteMany();
+    await prisma.session.deleteMany();
+    await prisma.account.deleteMany();
+    await prisma.verificationToken.deleteMany();
+    await prisma.user.deleteMany();
+}
+
 async function main() {
+    await clearAllData();
+
     const electronics = await prisma.category.upsert({
         where: { slug: 'electronics' },
         update: {},
@@ -31,6 +56,7 @@ async function main() {
         },
     });
 
+    const alicePassword = await bcrypt.hash('alicepassword', 10);
     const alice = await prisma.user.upsert({
         where: { email: 'alice@prisma.io' },
         update: {},
@@ -38,9 +64,10 @@ async function main() {
             email: 'alice@prisma.io',
             name: 'Alice',
             role: 'ADMIN',
-            emailVerified: new Date(),
+            hashedPassword: alicePassword,
         },
     });
+    const bobPassword = await bcrypt.hash('bobpassword', 10);
     const bob = await prisma.user.upsert({
         where: { email: 'bob@prisma.io' },
         update: {},
@@ -48,6 +75,7 @@ async function main() {
             email: 'bob@prisma.io',
             name: 'Bob',
             role: 'BUYER',
+            hashedPassword: bobPassword,
         },
     });
 
@@ -60,7 +88,7 @@ async function main() {
             sellerId: alice.id,
             imagesId: {
                 create: [
-                    { url: 'https://img.freepik.com/free-photo/modern-smartphone-mockup-design_23-2149437077.jpg', alt: 'Smartphone' },
+                    { url: 'https://www.pexels.com/photo/person-in-yellow-jacket-taking-photo-in-the-forest-5048613/', alt: 'Smartphone' },
                 ],
             },
             tags: {
@@ -109,42 +137,6 @@ async function main() {
         });
     }
 
-    // Example for the first two products
-    await prisma.product.create({
-        data: {
-            name: 'Smartphone',
-            price: 699.99,
-            description: 'Latest model smartphone',
-            categoryId: electronics.id,
-            sellerId: alice.id,
-            imagesId: {
-                create: [
-                    { url: 'https://img.freepik.com/free-photo/modern-smartphone-mockup-design_23-2149437077.jpg', alt: 'Smartphone' },
-                ],
-            },
-            tags: {
-                connectOrCreate: getTagConnect(['wireless', 'smart', 'portable'])
-            }
-        },
-    });
-    await prisma.product.create({
-        data: {
-            name: 'Designer T-Shirt',
-            price: 49.99,
-            description: 'Trendy designer t-shirt',
-            categoryId: fashion.id,
-            sellerId: bob.id,
-            imagesId: {
-                create: [
-                    { url: 'https://example.com/tshirt.jpg', alt: 'T-Shirt' },
-                ],
-            },
-            tags: {
-                connectOrCreate: getTagConnect(['fashion', 'accessory'])
-            }
-        },
-    });
-
     // Update productsData to include tags
     const productsData = [
         {
@@ -153,13 +145,7 @@ async function main() {
             description: 'Noise-cancelling over-ear headphones',
             categoryId: electronics.id,
             sellerId: alice.id,
-            images: [
-                'https://example.com/headphones1.jpg',
-                'https://example.com/headphones2.jpg',
-                'https://example.com/headphones3.jpg',
-                'https://example.com/headphones4.jpg',
-                'https://example.com/headphones5.jpg',
-            ],
+            images: Array.from({ length: 5 }, (_, i) => placeholderImage('headphones', i)),
             tags: ['wireless', 'smart', 'gaming']
         },
         {
@@ -168,11 +154,7 @@ async function main() {
             description: 'Fitness tracking smart watch',
             categoryId: electronics.id,
             sellerId: bob.id,
-            images: [
-                'https://example.com/smartwatch1.jpg',
-                'https://example.com/smartwatch2.jpg',
-                'https://example.com/smartwatch3.jpg',
-            ],
+            images: Array.from({ length: 3 }, (_, i) => placeholderImage('smartwatch', i)),
             tags: ['smart', 'fitness', 'wireless']
         },
         {
@@ -182,9 +164,7 @@ async function main() {
             categoryId: electronics.id,
             sellerId: alice.id,
             images: [
-                'https://example.com/speaker1.jpg',
-                'https://example.com/speaker2.jpg',
-                'https://example.com/speaker3.jpg',
+                'https://images.pexels.com/photos/1034653/pexels-photo-1034653.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'
             ],
             tags: ['portable', 'wireless']
         },
@@ -195,10 +175,7 @@ async function main() {
             categoryId: electronics.id,
             sellerId: bob.id,
             images: [
-                'https://example.com/laptop1.jpg',
-                'https://example.com/laptop2.jpg',
-                'https://example.com/laptop3.jpg',
-                'https://example.com/laptop4.jpg',
+                'https://images.pexels.com/photos/812264/pexels-photo-812264.jpeg'
             ],
             tags: ['smart', 'gaming']
         },
@@ -208,11 +185,7 @@ async function main() {
             description: '10-inch Android tablet',
             categoryId: electronics.id,
             sellerId: alice.id,
-            images: [
-                'https://example.com/tablet1.jpg',
-                'https://example.com/tablet2.jpg',
-                'https://example.com/tablet3.jpg',
-            ],
+            images: Array.from({ length: 3 }, (_, i) => placeholderImage('tablet', i)),
             tags: ['portable', 'smart']
         },
         {
@@ -221,11 +194,7 @@ async function main() {
             description: 'Ergonomic gaming mouse',
             categoryId: electronics.id,
             sellerId: bob.id,
-            images: [
-                'https://example.com/mouse1.jpg',
-                'https://example.com/mouse2.jpg',
-                'https://example.com/mouse3.jpg',
-            ],
+            images: Array.from({ length: 3 }, (_, i) => placeholderImage('gaming mouse', i)),
             tags: ['gaming', 'wireless']
         },
         {
@@ -235,10 +204,7 @@ async function main() {
             categoryId: fashion.id,
             sellerId: alice.id,
             images: [
-                'https://example.com/jacket1.jpg',
-                'https://example.com/jacket2.jpg',
-                'https://example.com/jacket3.jpg',
-                'https://example.com/jacket4.jpg',
+                'https://images.pexels.com/photos/1124468/pexels-photo-1124468.jpeg'
             ],
             tags: ['fashion', 'accessory']
         },
@@ -249,11 +215,7 @@ async function main() {
             categoryId: fashion.id,
             sellerId: bob.id,
             images: [
-                'https://example.com/sneakers1.jpg',
-                'https://example.com/sneakers2.jpg',
-                'https://example.com/sneakers3.jpg',
-                'https://example.com/sneakers4.jpg',
-                'https://example.com/sneakers5.jpg',
+                'https://images.pexels.com/photos/4462782/pexels-photo-4462782.jpeg'
             ],
             tags: ['fashion', 'fitness']
         },
@@ -263,11 +225,7 @@ async function main() {
             description: 'Waterproof travel backpack',
             categoryId: fashion.id,
             sellerId: alice.id,
-            images: [
-                'https://example.com/backpack1.jpg',
-                'https://example.com/backpack2.jpg',
-                'https://example.com/backpack3.jpg',
-            ],
+            images: Array.from({ length: 3 }, (_, i) => placeholderImage('backpack', i)),
             tags: ['fashion', 'outdoor']
         },
         {
@@ -276,11 +234,7 @@ async function main() {
             description: 'UV protection sunglasses',
             categoryId: fashion.id,
             sellerId: bob.id,
-            images: [
-                'https://example.com/sunglasses1.jpg',
-                'https://example.com/sunglasses2.jpg',
-                'https://example.com/sunglasses3.jpg',
-            ],
+            images: Array.from({ length: 3 }, (_, i) => placeholderImage('sunglasses', i)),
             tags: ['fashion', 'accessory']
         },
         {
@@ -290,10 +244,7 @@ async function main() {
             categoryId: fashion.id,
             sellerId: alice.id,
             images: [
-                'https://example.com/dress1.jpg',
-                'https://example.com/dress2.jpg',
-                'https://example.com/dress3.jpg',
-                'https://example.com/dress4.jpg',
+                'https://images.pexels.com/photos/2065195/pexels-photo-2065195.jpeg'
             ],
             tags: ['fashion']
         },
@@ -303,11 +254,7 @@ async function main() {
             description: 'Slim fit blue jeans',
             categoryId: fashion.id,
             sellerId: bob.id,
-            images: [
-                'https://example.com/jeans1.jpg',
-                'https://example.com/jeans2.jpg',
-                'https://example.com/jeans3.jpg',
-            ],
+            images: Array.from({ length: 3 }, (_, i) => placeholderImage('blue jeans', i)),
             tags: ['fashion']
         },
         {
@@ -316,12 +263,7 @@ async function main() {
             description: 'Designer leather handbag',
             categoryId: fashion.id,
             sellerId: alice.id,
-            images: [
-                'https://example.com/handbag1.jpg',
-                'https://example.com/handbag2.jpg',
-                'https://example.com/handbag3.jpg',
-                'https://example.com/handbag4.jpg',
-            ],
+            images: Array.from({ length: 4 }, (_, i) => placeholderImage('leather handbag', i)),
             tags: ['fashion', 'accessory']
         },
         {
@@ -330,11 +272,7 @@ async function main() {
             description: 'Luxury wrist watch',
             categoryId: fashion.id,
             sellerId: bob.id,
-            images: [
-                'https://example.com/watch1.jpg',
-                'https://example.com/watch2.jpg',
-                'https://example.com/watch3.jpg',
-            ],
+            images: Array.from({ length: 3 }, (_, i) => placeholderImage('luxury watch', i)),
             tags: ['fashion', 'accessory']
         },
         {
@@ -343,11 +281,7 @@ async function main() {
             description: 'Wireless Bluetooth earbuds',
             categoryId: electronics.id,
             sellerId: alice.id,
-            images: [
-                'https://example.com/earbuds1.jpg',
-                'https://example.com/earbuds2.jpg',
-                'https://example.com/earbuds3.jpg',
-            ],
+            images: Array.from({ length: 3 }, (_, i) => placeholderImage('bluetooth earbuds', i)),
             tags: ['wireless', 'smart']
         },
         {
@@ -356,11 +290,7 @@ async function main() {
             description: 'Waterproof fitness tracker',
             categoryId: electronics.id,
             sellerId: bob.id,
-            images: [
-                'https://example.com/fitnesstracker1.jpg',
-                'https://example.com/fitnesstracker2.jpg',
-                'https://example.com/fitnesstracker3.jpg',
-            ],
+            images: Array.from({ length: 3 }, (_, i) => placeholderImage('fitness tracker', i)),
             tags: ['fitness', 'smart']
         },
         {
@@ -369,11 +299,7 @@ async function main() {
             description: 'Fast wireless charger',
             categoryId: electronics.id,
             sellerId: alice.id,
-            images: [
-                'https://example.com/charger1.jpg',
-                'https://example.com/charger2.jpg',
-                'https://example.com/charger3.jpg',
-            ],
+            images: Array.from({ length: 3 }, (_, i) => placeholderImage('wireless charger', i)),
             tags: ['wireless', 'accessory']
         },
         {
@@ -382,11 +308,7 @@ async function main() {
             description: 'Cool graphic t-shirt',
             categoryId: fashion.id,
             sellerId: bob.id,
-            images: [
-                'https://example.com/graphictee1.jpg',
-                'https://example.com/graphictee2.jpg',
-                'https://example.com/graphictee3.jpg',
-            ],
+            images: Array.from({ length: 3 }, (_, i) => placeholderImage('graphic t-shirt', i)),
             tags: ['fashion']
         },
         {
@@ -395,12 +317,7 @@ async function main() {
             description: 'Warm winter coat',
             categoryId: fashion.id,
             sellerId: alice.id,
-            images: [
-                'https://example.com/coat1.jpg',
-                'https://example.com/coat2.jpg',
-                'https://example.com/coat3.jpg',
-                'https://example.com/coat4.jpg',
-            ],
+            images: Array.from({ length: 4 }, (_, i) => placeholderImage('winter coat', i)),
             tags: ['fashion']
         },
         {
@@ -409,11 +326,7 @@ async function main() {
             description: 'Lightweight running shorts',
             categoryId: fashion.id,
             sellerId: bob.id,
-            images: [
-                'https://example.com/shorts1.jpg',
-                'https://example.com/shorts2.jpg',
-                'https://example.com/shorts3.jpg',
-            ],
+            images: Array.from({ length: 3 }, (_, i) => placeholderImage('running shorts', i)),
             tags: ['fitness', 'fashion']
         },
     ];
@@ -488,55 +401,35 @@ async function main() {
             name: 'Stainless Steel Electric Kettle',
             price: 24.99,
             description: '1.7L Fast Boil Electric Kettle',
-            images: [
-                'https://ae01.alicdn.com/kf/Hb1e2e7e7e7e24e2e8a7e7e7e7e7e7e7e7/Electric-Kettle-1.jpg',
-                'https://ae01.alicdn.com/kf/Hb1e2e7e7e7e24e2e8a7e7e7e7e7e7e7e7/Electric-Kettle-2.jpg',
-                'https://ae01.alicdn.com/kf/Hb1e2e7e7e7e24e2e8a7e7e7e7e7e7e7e7/Electric-Kettle-3.jpg',
-            ],
+            images: Array.from({ length: 3 }, (_, i) => placeholderImage('kettle kitchen', i)),
             tags: ['kitchen', 'eco-friendly']
         },
         {
             name: 'Nonstick Frying Pan',
             price: 18.99,
             description: '28cm Nonstick Skillet with Lid',
-            images: [
-                'https://ae01.alicdn.com/kf/Hb2e2e7e7e7e24e2e8a7e7e7e7e7e7e7e7/Frying-Pan-1.jpg',
-                'https://ae01.alicdn.com/kf/Hb2e2e7e7e7e24e2e8a7e7e7e7e7e7e7e7/Frying-Pan-2.jpg',
-                'https://ae01.alicdn.com/kf/Hb2e2e7e7e7e24e2e8a7e7e7e7e7e7e7e7/Frying-Pan-3.jpg',
-            ],
+            images: Array.from({ length: 3 }, (_, i) => placeholderImage('nonstick frying pan', i)),
             tags: ['kitchen']
         },
         {
             name: 'Automatic Coffee Maker',
             price: 59.99,
             description: '12-Cup Programmable Coffee Machine',
-            images: [
-                'https://m.media-amazon.com/images/I/71QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/81QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/91QKQ9mwV7L._AC_SL1500_.jpg',
-            ],
+            images: Array.from({ length: 3 }, (_, i) => placeholderImage('coffee maker', i)),
             tags: ['kitchen', 'eco-friendly']
         },
         {
             name: 'Air Fryer XL',
             price: 89.99,
             description: '5.8QT Large Air Fryer Oven',
-            images: [
-                'https://m.media-amazon.com/images/I/71bKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/81bKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/91bKQ9mwV7L._AC_SL1500_.jpg',
-            ],
+            images: Array.from({ length: 3 }, (_, i) => placeholderImage('air fryer', i)),
             tags: ['kitchen', 'eco-friendly']
         },
         {
             name: 'Robot Vacuum Cleaner',
             price: 149.99,
             description: 'Smart Robotic Vacuum with WiFi',
-            images: [
-                'https://m.media-amazon.com/images/I/71cKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/81cKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/91cKQ9mwV7L._AC_SL1500_.jpg',
-            ],
+            images: Array.from({ length: 3 }, (_, i) => placeholderImage('robot vacuum', i)),
             tags: ['home', 'cleaning']
         },
     ];
@@ -545,55 +438,35 @@ async function main() {
             name: 'Facial Cleansing Brush',
             price: 19.99,
             description: 'Electric facial cleansing brush',
-            images: [
-                'https://m.media-amazon.com/images/I/61QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/71QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/81QKQ9mwV7L._AC_SL1500_.jpg',
-            ],
+            images: Array.from({ length: 3 }, (_, i) => placeholderImage('facial cleansing brush', i)),
             tags: ['beauty', 'skincare']
         },
         {
             name: 'Makeup Brush Set',
             price: 29.99,
             description: 'Professional makeup brush set',
-            images: [
-                'https://m.media-amazon.com/images/I/61QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/71QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/81QKQ9mwV7L._AC_SL1500_.jpg',
-            ],
+            images: Array.from({ length: 3 }, (_, i) => placeholderImage('makeup brush set', i)),
             tags: ['beauty', 'makeup']
         },
         {
             name: 'Hair Dryer',
             price: 39.99,
             description: '2200W Professional Hair Dryer',
-            images: [
-                'https://m.media-amazon.com/images/I/61QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/71QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/81QKQ9mwV7L._AC_SL1500_.jpg',
-            ],
+            images: Array.from({ length: 3 }, (_, i) => placeholderImage('hair dryer', i)),
             tags: ['beauty', 'haircare']
         },
         {
             name: 'Electric Toothbrush',
             price: 49.99,
             description: 'Sonic electric toothbrush with timer',
-            images: [
-                'https://m.media-amazon.com/images/I/61QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/71QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/81QKQ9mwV7L._AC_SL1500_.jpg',
-            ],
+            images: Array.from({ length: 3 }, (_, i) => placeholderImage('electric toothbrush', i)),
             tags: ['beauty', 'oral-care']
         },
         {
             name: 'Skincare Fridge',
             price: 99.99,
             description: 'Mini skincare fridge with mirror',
-            images: [
-                'https://m.media-amazon.com/images/I/61QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/71QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/81QKQ9mwV7L._AC_SL1500_.jpg',
-            ],
+            images: Array.from({ length: 3 }, (_, i) => placeholderImage('skincare fridge', i)),
             tags: ['beauty', 'skincare']
         },
     ];
@@ -602,55 +475,35 @@ async function main() {
             name: 'Remote Control Car',
             price: 39.99,
             description: '1:18 Scale Remote Control Car',
-            images: [
-                'https://m.media-amazon.com/images/I/61QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/71QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/81QKQ9mwV7L._AC_SL1500_.jpg',
-            ],
+            images: Array.from({ length: 3 }, (_, i) => placeholderImage('remote control car', i)),
             tags: ['toy', 'hobby']
         },
         {
             name: 'Building Blocks Set',
             price: 29.99,
             description: 'Creative building blocks set',
-            images: [
-                'https://m.media-amazon.com/images/I/61QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/71QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/81QKQ9mwV7L._AC_SL1500_.jpg',
-            ],
+            images: Array.from({ length: 3 }, (_, i) => placeholderImage('building blocks', i)),
             tags: ['toy', 'educational']
         },
         {
             name: 'Puzzle Game',
             price: 19.99,
             description: '500-piece jigsaw puzzle',
-            images: [
-                'https://m.media-amazon.com/images/I/61QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/71QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/81QKQ9mwV7L._AC_SL1500_.jpg',
-            ],
+            images: Array.from({ length: 3 }, (_, i) => placeholderImage('jigsaw puzzle', i)),
             tags: ['game', 'puzzle']
         },
         {
             name: 'Action Figure',
             price: 24.99,
             description: 'Collectible action figure',
-            images: [
-                'https://m.media-amazon.com/images/I/61QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/71QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/81QKQ9mwV7L._AC_SL1500_.jpg',
-            ],
+            images: Array.from({ length: 3 }, (_, i) => placeholderImage('action figure', i)),
             tags: ['toy', 'collectible']
         },
         {
             name: 'Board Game',
             price: 34.99,
             description: 'Strategy board game for adults',
-            images: [
-                'https://m.media-amazon.com/images/I/61QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/71QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/81QKQ9mwV7L._AC_SL1500_.jpg',
-            ],
+            images: Array.from({ length: 3 }, (_, i) => placeholderImage('board game', i)),
             tags: ['game', 'strategy']
         },
     ];
@@ -659,55 +512,35 @@ async function main() {
             name: 'Yoga Mat',
             price: 19.99,
             description: 'Non-slip yoga mat',
-            images: [
-                'https://m.media-amazon.com/images/I/61QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/71QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/81QKQ9mwV7L._AC_SL1500_.jpg',
-            ],
+            images: Array.from({ length: 3 }, (_, i) => placeholderImage('yoga mat', i)),
             tags: ['fitness', 'yoga']
         },
         {
             name: 'Dumbbell Set',
             price: 49.99,
             description: 'Adjustable dumbbell set',
-            images: [
-                'https://m.media-amazon.com/images/I/61QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/71QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/81QKQ9mwV7L._AC_SL1500_.jpg',
-            ],
+            images: Array.from({ length: 3 }, (_, i) => placeholderImage('dumbbell set', i)),
             tags: ['fitness', 'exercise']
         },
         {
             name: 'Treadmill',
             price: 299.99,
             description: 'Folding treadmill with incline',
-            images: [
-                'https://m.media-amazon.com/images/I/61QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/71QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/81QKQ9mwV7L._AC_SL1500_.jpg',
-            ],
+            images: Array.from({ length: 3 }, (_, i) => placeholderImage('treadmill', i)),
             tags: ['fitness', 'exercise']
         },
         {
             name: 'Camping Tent',
             price: 89.99,
             description: 'Waterproof camping tent',
-            images: [
-                'https://m.media-amazon.com/images/I/61QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/71QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/81QKQ9mwV7L._AC_SL1500_.jpg',
-            ],
+            images: Array.from({ length: 3 }, (_, i) => placeholderImage('camping tent', i)),
             tags: ['outdoor', 'camping']
         },
         {
             name: 'Hiking Backpack',
             price: 69.99,
             description: 'Lightweight hiking backpack',
-            images: [
-                'https://m.media-amazon.com/images/I/61QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/71QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/81QKQ9mwV7L._AC_SL1500_.jpg',
-            ],
+            images: Array.from({ length: 3 }, (_, i) => placeholderImage('hiking backpack', i)),
             tags: ['outdoor', 'hiking']
         },
     ];
@@ -716,55 +549,35 @@ async function main() {
             name: 'Car Phone Mount',
             price: 9.99,
             description: 'Universal car phone holder',
-            images: [
-                'https://m.media-amazon.com/images/I/61QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/71QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/81QKQ9mwV7L._AC_SL1500_.jpg',
-            ],
+            images: Array.from({ length: 3 }, (_, i) => placeholderImage('car phone mount', i)),
             tags: ['car', 'accessory']
         },
         {
             name: 'Dash Cam',
             price: 49.99,
             description: '1080P Full HD dash cam',
-            images: [
-                'https://m.media-amazon.com/images/I/61QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/71QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/81QKQ9mwV7L._AC_SL1500_.jpg',
-            ],
+            images: Array.from({ length: 3 }, (_, i) => placeholderImage('dash cam', i)),
             tags: ['car', 'accessory']
         },
         {
             name: 'OBD2 Scanner',
             price: 29.99,
             description: 'Car diagnostic tool',
-            images: [
-                'https://m.media-amazon.com/images/I/61QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/71QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/81QKQ9mwV7L._AC_SL1500_.jpg',
-            ],
+            images: Array.from({ length: 3 }, (_, i) => placeholderImage('OBD2 scanner', i)),
             tags: ['car', 'accessory']
         },
         {
             name: 'Car Vacuum Cleaner',
             price: 39.99,
             description: 'Portable car vacuum cleaner',
-            images: [
-                'https://m.media-amazon.com/images/I/61QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/71QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/81QKQ9mwV7L._AC_SL1500_.jpg',
-            ],
+            images: Array.from({ length: 3 }, (_, i) => placeholderImage('car vacuum cleaner', i)),
             tags: ['car', 'cleaning']
         },
         {
             name: 'Motorcycle Cover',
             price: 19.99,
             description: 'Waterproof motorcycle cover',
-            images: [
-                'https://m.media-amazon.com/images/I/61QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/71QKQ9mwV7L._AC_SL1500_.jpg',
-                'https://m.media-amazon.com/images/I/81QKQ9mwV7L._AC_SL1500_.jpg',
-            ],
+            images: Array.from({ length: 3 }, (_, i) => placeholderImage('motorcycle cover', i)),
             tags: ['motorcycle', 'accessory']
         },
     ];
@@ -812,6 +625,49 @@ async function main() {
                 },
             });
         }
+    }
+
+    // Faker-based product seeding
+    async function seedFakerProducts(
+        category: { id: string },
+        seller: { id: string },
+        count: number = 20,
+        tagPool: string[] = []
+    ) {
+        for (let i = 0; i < count; i++) {
+            const name = faker.commerce.productName();
+            const price = parseFloat(faker.commerce.price({ min: 10, max: 1000 }));
+            const description = faker.commerce.productDescription();
+            const keyword = name.split(' ')[0];
+            const images = Array.from({ length: faker.number.int({ min: 2, max: 5 }) }, (_, j) => placeholderImage(keyword, j));
+            const tags = faker.helpers.arrayElements(tagPool, faker.number.int({ min: 1, max: 3 }));
+            await prisma.product.create({
+                data: {
+                    name,
+                    price,
+                    description,
+                    categoryId: category.id,
+                    sellerId: seller.id,
+                    imagesId: {
+                        create: images.map((url, k) => ({ url, alt: `${name} Image ${k + 1}` })),
+                    },
+                    tags: {
+                        connectOrCreate: getTagConnect(tags)
+                    }
+                },
+            });
+        }
+    }
+
+    // Example usage after categories and users are created:
+    await seedFakerProducts(electronics, alice, 20, ['wireless', 'smart', 'gaming', 'portable']);
+    await seedFakerProducts(fashion, bob, 20, ['fashion', 'accessory', 'fitness', 'outdoor']);
+    if (createdCategories.length >= 5) {
+        await seedFakerProducts(createdCategories[0], alice, 20, ['kitchen', 'eco-friendly']); // Home & Kitchen
+        await seedFakerProducts(createdCategories[1], bob, 20, ['beauty', 'skincare']); // Beauty & Health
+        await seedFakerProducts(createdCategories[2], alice, 20, ['gaming', 'outdoor']); // Toys & Hobbies
+        await seedFakerProducts(createdCategories[3], bob, 20, ['fitness', 'outdoor']); // Sports & Outdoors
+        await seedFakerProducts(createdCategories[4], alice, 20, ['car', 'accessory']); // Automobiles & Motorcycles
     }
 }
 

@@ -5,5 +5,5 @@ import { cookies } from 'next/headers';
 export default async function retrieveRefreshToken(): Promise<string | null> {
     const cookieStore = await cookies();
 
-    return cookieStore.get('refreshToken')?.value || null;
+    return cookieStore.get('token')?.value || null;
 }

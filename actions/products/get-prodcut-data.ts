@@ -11,8 +11,6 @@ export const getProductData = async (id: string) => {
             },
         })
 
-        console.log("Product Data: ", productData)
-
         return { productData, };
     } catch (error) {
         console.error("Error fetching product data:", error);

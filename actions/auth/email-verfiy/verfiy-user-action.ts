@@ -1,6 +1,6 @@
 "use server";
 import prisma from "@/lib/prisma";
-import { storeRefreshToken } from "../store-token/store-refresh-token";
+import { storeRefreshToken } from "../token/store-refresh-token";
 import { randomBytes } from "crypto";
 
 export const verifyLogin = async (token: string) => {

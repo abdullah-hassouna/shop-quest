@@ -1,47 +1,72 @@
-// import { create } from "zustand";
-// import { persist } from "zustand/middleware";
+import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
+import type { Role } from "@prisma/client";
 
-// export interface UserData {
-//     fullname: string;
-//     email: string;
-// }
+export interface UserData {
+    id: string;
+    name: string;
+    email: string;
+    role: Role
+}
 
-// interface UserState {
-//     user: UserData;
-//     changeName: (newName: String) => void;
-//     changeEmail: (newEmail: String) => void;
-//     removeUser: () => void;
-//     addUser: (newUser: UserData) => void;
-// }
+export interface UserState {
+    user: UserData;
+    changeName: (newName: string) => void;
+    changeEmail: (newEmail: string) => void;
+    removeUser: () => void;
+    addUser: (newUser: UserData) => void;
+}
 
-// const useUserDataStore = create<UserState>()(
-//     persist(
-//         (set: any, get: () => { user: UserData }) => ({
-//             user: { fullname: "", email: "" },
-//             changeName: (newName: String) => {
-//                 const existingItem = get().user.email.length !== 0 && get().user.fullname.length !== 0;
-//                 if (existingItem) {
-//                     set((state: UserState) => ({ ...(state.user), fullname: newName, }));
-//                 } else {
-//                     set((state: UserState) => (state.user));
-//                 }
-//             },
-//             changeEmail: (newEmail: String) => {
-//                 const existingItem = get().user.email.length !== 0 && get().user.fullname.length !== 0;
-//                 if (existingItem) {
-//                     set((state: UserState) => ({ ...(state.user), email: newEmail, }));
-//                 } else {
-//                     set((state: UserState) => (state.user));
-//                 }
-//             },
-//             removeUser: () =>
-//                 set(() => ({
-//                     user: { fullname: "", email: "" },
-//                 })),
-//             addUser: (newUser: UserData) => set({ user: newUser }),
-//         }),
-//         { name: "user-data-storage" }
-//     )
-// );
+const useUserDataStore = create<UserState>()(
+    persist(
+        (set, get) => ({
+            user: {
+                name: "", email: "", role: "BUYER",
+                id: ""
+            }, // Default role set to USER
 
-// export default useUserDataStore;
+            changeName: (newName: string) => {
+                const user = get().user;
+                if (user.email && user.name) {
+                    set({
+                        user: {
+                            id: user.id, name: newName, email: user.email, role: user.role,
+
+                        }
+                    });
+                }
+            },
+
+            changeEmail: (newEmail: string) => {
+                const user = get().user;
+                if (user.email && user.name) {
+                    set({ user: { ...user, email: newEmail } });
+                }
+            },
+
+            removeUser: () => {
+                set({
+                    user: {
+                        name: "", email: "", role: "BUYER",
+                        id: ""
+                    }
+                });
+            },
+
+            addUser: (newUser: UserData) => {
+                set({
+                    user: {
+                        id: newUser.id, email: newUser.email, name: newUser.name, role: newUser.role,
+
+                    }
+                });
+            },
+        }),
+        {
+            name: "user-data-storage",
+            storage: createJSONStorage(() => localStorage),
+        }
+    )
+);
+
+export default useUserDataStore;

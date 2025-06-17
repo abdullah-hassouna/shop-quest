@@ -7,13 +7,7 @@ export const getCatalogryWithProducts = async () => {
         const categories = await prisma.category.findMany({
             include: {
                 products: {
-                    take: 4,
-                    // select: {
-                    //     category: false,
-                    //     categoryId: false,
-                    //     seller: false,
-                    //     sellerId: false,
-                    // },
+                    take: 8,
                     include: {
                         imagesId: true,
                         tags: true
@@ -21,8 +15,6 @@ export const getCatalogryWithProducts = async () => {
                 }
             }
         })
-
-        console.log(categories)
 
         return {
             categories,

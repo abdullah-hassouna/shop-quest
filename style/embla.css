@@ -75,8 +75,9 @@
 .embla__dots {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-end;
+  justify-content: flex-start;
   align-items: center;
+  gap: 0.6rem;
   margin-right: calc((2.6rem - 1.4rem) / 2 * -1);
 }
 .embla__dot {
@@ -84,15 +85,16 @@
   -webkit-appearance: none;
   appearance: none;
   background-color: transparent;
+  border: 1px solid black;
   touch-action: manipulation;
   display: inline-flex;
   text-decoration: none;
   cursor: pointer;
-  border: 0;
+  /* border: 0; */
   padding: 0;
   margin: 0;
-  width: 2.6rem;
-  height: 2.6rem;
+  width: 1.6rem;
+  height: 1.6rem;
   display: flex;
   align-items: center;
   justify-content: center;

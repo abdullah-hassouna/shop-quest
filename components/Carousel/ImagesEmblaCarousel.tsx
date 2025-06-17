@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { EmblaOptionsType } from 'embla-carousel'
 import { DotButton, useDotButton } from './DotButton'
 import type { Image } from "@prisma/client"
@@ -29,10 +29,23 @@ const ImagesCarousel: React.FC<PropType> = (props) => {
     onNextButtonClick
   } = usePrevNextButtons(emblaApi)
 
+  // Auto-play: show one slide at a time, auto-advance every 3 seconds
+  useEffect(() => {
+    if (!emblaApi) return;
+    const interval = setInterval(() => {
+      if (emblaApi.canScrollNext()) {
+        emblaApi.scrollNext();
+      } else {
+        emblaApi.scrollTo(0);
+      }
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [emblaApi]);
+
   return (
-    <section className="embla w-[80vw] min-w-0 p-0 m-0">
-      <div className="embla__viewport w-[80vw] min-w-0 p-0 m-0 overflow-hidden" ref={emblaRef}>
-        <div className="embla__container w-[80vw] min-w-0 flex p-0 m-0">
+    <section className="embla">
+      <div className="embla__viewport overflow-hidden" ref={emblaRef}>
+        <div className="embla__container">
           {slides.map((Img, index) => (
             <div className="embla__slide min-w-full p-0 m-0" key={index}>
               <img src={Img.url} alt={Img.alt || "image of product"} key={Img.id} />

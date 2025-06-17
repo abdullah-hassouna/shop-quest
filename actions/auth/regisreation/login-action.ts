@@ -1,13 +1,14 @@
 "use server";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { cookies } from 'next/headers';
 import { logInValidationSchema } from "@/validation/auth-validation";
-import { storeRefreshToken } from "../store-token/store-refresh-token";
-import sendNewToken from "../create-token";
-import createNewSession from "../create-new-session";
+import sendNewToken from "../token/create-token";
+import createNewSession from "../session/create-new-session";
 
 export const login = async (values: { email: string, password: string }) => {
     let validatedFields = values;
+    const cookieStore = await cookies();
 
     try {
         validatedFields = await logInValidationSchema.validate(values, { abortEarly: false });
@@ -45,14 +46,22 @@ export const login = async (values: { email: string, password: string }) => {
             redirect: "/auth/check-email",
         };
     }
-    storeRefreshToken(await createNewSession(user.id));
+
+    cookieStore.set("token", await createNewSession(user.id), {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 10 * 24 * 60 * 60,
+        path: "/",
+    });
 
     return {
         success: "Login successful!",
+        redirect: "../",
         user: {
             id: user.id,
             name: user.name,
             email: user.email,
+            role: user.role
         },
     };
 };

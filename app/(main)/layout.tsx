@@ -1,4 +1,4 @@
-// import Navbar from '@/components/Navbar';
+import Navbar from '@/components/NavBar';
 import React from 'react';
 
 const layout = ({
@@ -8,7 +8,7 @@ const layout = ({
 }>) => {
     return (
         <div className=''>
-            {/* <Navbar /> */}
+            <Navbar />
             <div className='py-20'>{children}</div>
         </div>
     );
