@@ -24,3 +24,23 @@ export const signUpValidationSchema = Yup.object({
         .oneOf([Yup.ref('password'), ''], 'Passwords must match')
         .required('Confirm password is required'),
 });
+
+
+export const editUserDataValidationSchema = Yup.object({
+    fullname: Yup.string()
+        .min(2, 'Full name must be at least 2 characters'),
+    email: Yup.string()
+        .email('Invalid email address'),
+    password: Yup.string()
+        .min(6, 'Password must be at least 6 characters'),
+    confirmPassword: Yup.string()
+        .oneOf([Yup.ref('password'), ''], 'Passwords must match')
+
+});
+
+
+export const ConfirmUserValidationSchema = Yup.object({
+    password: Yup.string()
+        .min(6, 'Password must be at least 6 characters')
+        .required('Required'),
+});

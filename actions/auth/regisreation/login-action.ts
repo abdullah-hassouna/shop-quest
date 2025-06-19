@@ -30,7 +30,6 @@ export const login = async (values: { email: string, password: string }) => {
             error: "Invalid email or password.",
         };
     }
-
     const isPasswordValid = await bcrypt.compare(password, user.hashedPassword as string);
 
     if (!isPasswordValid) {

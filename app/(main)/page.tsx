@@ -7,7 +7,7 @@ import { getCatalogryWithProducts } from '@/actions/products/get-category-with-p
 
 import ProductCatalog from '@/components/ProductCategory';
 import { Toaster } from '@/components/ui/sonner';
-import getUserSession from '@/actions/auth/regisreation/getUserSession';
+import getUserSession from '@/actions/auth/regisreation/get-user-session';
 
 export default function HomePage() {
   const [categories, setCategories] = useState<any[]>([]);

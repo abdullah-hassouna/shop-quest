@@ -17,8 +17,7 @@ export const getRelatedProducts = async (product: ProductInterface) => {
             include: { imagesId: true },
             take: 10, // limit results
         });
-
-        // console.log(relatedProducts)
+ 
 
         return {
             relatedProducts,

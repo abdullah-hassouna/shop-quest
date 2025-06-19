@@ -14,7 +14,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import getUserSession from '@/actions/auth/regisreation/getUserSession';
+import getUserSession from '@/actions/auth/regisreation/get-user-session';
 import logoutAction from '@/actions/auth/regisreation/logout-action';
 import { useRouter } from 'next/navigation';
 import useCartStore from '@/store/cart-store';

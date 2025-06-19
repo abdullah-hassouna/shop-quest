@@ -28,6 +28,7 @@ model User {
   Product        Product[]
   Order          Order[]
   Notification   Notification[]
+  OTP            OTP[]
 }
 
 model Account {
@@ -105,8 +106,15 @@ model Order {
   buyerId   String
   items     OrderItem[]
   total     Float
-  status    String      @default("PENDING")
+  status    OrderStatus @default(PENDING)
   createdAt DateTime    @default(now())
+}
+
+enum OrderStatus {
+  PENDING
+  SHIPPED
+  DELIVERED
+  CANCELLED
 }
 
 model OrderItem {
@@ -132,4 +140,13 @@ model Tag {
   id       String    @id @default(uuid())
   name     String    @unique
   products Product[] @relation("ProductTags")
+}
+
+model OTP {
+  id        String   @id @default(uuid())
+  userId    String
+  User      User     @relation(fields: [userId], references: [id])
+  code      String
+  expires   DateTime
+  createdAt DateTime @default(now())
 }

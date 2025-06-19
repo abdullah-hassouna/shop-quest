@@ -11,11 +11,12 @@ import {
   CreditCard,
   LogIn,
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { redirect, useRouter } from 'next/navigation';
 import useCartStore from '@/store/cart-store';
-import getUserSession from '@/actions/auth/regisreation/getUserSession';
+import getUserSession from '@/actions/auth/regisreation/get-user-session';
 import useUserDataStore, { UserState } from '@/store/user-store';
 import createOrder from '@/actions/orders/create-order';
+import { toast } from 'sonner';
 
 export default function CartPage() {
   const router = useRouter();
@@ -29,23 +30,6 @@ export default function CartPage() {
     return () => clearTimeout(timer);
   }, []);
 
-  useEffect(() => {
-    async function fetchUser() {
-      try {
-        setIsLoading(true);
-        const userData = await getUserSession();
-        if (userData) {
-          console.log(userData)
-        }
-        setIsLoading(false);
-      } catch (error) {
-        console.error({ error });
-        setIsLoading(false);
-      }
-    }
-    fetchUser();
-  }, []);
-
   const subtotal = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
@@ -55,16 +39,23 @@ export default function CartPage() {
 
   const createOrderAndCheckout = async () => {
 
-    await createOrder({
-      userId: user.id,
-      totalPrice: total,
-      shippingAddress: '',
-      products: cartItems.map((item) => ({
-        id: item.id,
-        quantity: item.quantity,
-        price: item.price,
-      }))
-    }).then(() => clearCart())
+    const { userData, sessionExpired } = await getUserSession();
+    if (sessionExpired) {
+      toast("You need an Account First!", { duration: 5000 })
+      setTimeout(() => redirect('/auth?ref=cart'), 5000)
+    }
+    if (userData) {
+      await createOrder({
+        userId: userData.id,
+        totalPrice: total,
+        shippingAddress: '',
+        products: cartItems.map((item) => ({
+          id: item.id,
+          quantity: item.quantity,
+          price: item.price,
+        }))
+      }).then(() => clearCart())
+    }
   };
 
   return (

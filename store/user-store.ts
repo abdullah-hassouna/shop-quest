@@ -4,6 +4,7 @@ import type { Role } from "@prisma/client";
 
 export interface UserData {
     id: string;
+    img: "",
     name: string;
     email: string;
     role: Role
@@ -21,8 +22,8 @@ const useUserDataStore = create<UserState>()(
     persist(
         (set, get) => ({
             user: {
-                name: "", email: "", role: "BUYER",
-                id: ""
+                name: "", email: "", role: "BUYER", id: "",
+                img: ""
             }, // Default role set to USER
 
             changeName: (newName: string) => {
@@ -31,7 +32,7 @@ const useUserDataStore = create<UserState>()(
                     set({
                         user: {
                             id: user.id, name: newName, email: user.email, role: user.role,
-
+                            img: ""
                         }
                     });
                 }
@@ -48,7 +49,8 @@ const useUserDataStore = create<UserState>()(
                 set({
                     user: {
                         name: "", email: "", role: "BUYER",
-                        id: ""
+                        id: "",
+                        img: ""
                     }
                 });
             },
@@ -57,7 +59,7 @@ const useUserDataStore = create<UserState>()(
                 set({
                     user: {
                         id: newUser.id, email: newUser.email, name: newUser.name, role: newUser.role,
-
+                        img: ""
                     }
                 });
             },
