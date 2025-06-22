@@ -5,17 +5,30 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import clsx from 'clsx';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { UserData } from '@/store/user-store';
+import useUserDataStore, { UserData, UserState } from '@/store/user-store';
+import { uploadNewprofileImg } from '@/actions/cloudinary/upload-image';
+
 
 const ChangeProfileImageForm = ({ user }: { user: UserData }) => {
-    const [previewImg, setPreviewImg] = useState<Blob | undefined>()
+    const { user: userData, changeImg } = useUserDataStore((state: UserState) => state);
+    const [previewImg, setPreviewImg] = useState<File | undefined>()
+    const [isUploading, setIsUploading] = useState(false);
+
 
     return (<div>
         <Formik
             initialValues={{ newImageUrl: '' }}
-            onSubmit={async (values, { setSubmitting }) => {
-                console.log(values)
-                setSubmitting(false)
+            onSubmit={async () => {
+                if (previewImg) {
+                    setIsUploading(true)
+                    const newProfileImage = await uploadNewprofileImg(previewImg, userData.id)
+                    if (newProfileImage) {
+                        changeImg(newProfileImage);
+                    } else {
+                        console.error('Failed to upload image');
+                    }
+                    setIsUploading(false)
+                };
             }}
         >
             {({
@@ -29,7 +42,7 @@ const ChangeProfileImageForm = ({ user }: { user: UserData }) => {
             }) => (<form className=' flex flex-col space-y-4 sm:space-y-6' onSubmit={handleSubmit}>
                 <div className='w-full flex justify-center md:justify-start'>
                     <Avatar className='h-24 w-24 text-6xl text-purple-500'>
-                        <AvatarImage src={previewImg} alt={user.name} />
+                        {previewImg && <AvatarImage src={URL.createObjectURL(previewImg!)} alt={user.name} />}
                         <AvatarFallback className='bg-purple-500 text-gray-100'>
                             {user.name.split(" ")[0].charAt(0).toUpperCase()}
                         </AvatarFallback>
@@ -57,11 +70,13 @@ const ChangeProfileImageForm = ({ user }: { user: UserData }) => {
                         {errors.newImageUrl && touched.newImageUrl && errors.newImageUrl}
                     </small>
                 </div>
-                <Button
-                    type='submit'
-                    disabled={isSubmitting}
-                >Save
-                </Button>
+
+                {isUploading ? <p>Uploading...</p> :
+                    <Button
+                        type='submit'
+                        disabled={isSubmitting}
+                    >Save
+                    </Button>}
             </form>
             )}
         </Formik >

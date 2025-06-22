@@ -13,7 +13,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import getUserSession from '@/actions/auth/regisreation/get-user-session';
 import logoutAction from '@/actions/auth/regisreation/logout-action';
 import { useRouter } from 'next/navigation';
@@ -36,6 +36,7 @@ export default function Navbar() {
                 setIsLoading(true);
                 const { userData, } = (await getUserSession());
                 setFirstLetter(userData?.name?.split(" ").map(char => char.toLocaleUpperCase()).join("")[0] || "U");
+                console.log(userData)
                 if (userData) addUser(userData as unknown as UserData);
                 setIsLoading(false);
             } catch (error) {
@@ -125,13 +126,13 @@ export default function Navbar() {
                         {isLoading && (
                             <div className='flex items-center'>
                                 <Avatar className='h-8 w-8 cursor-pointer'>
+                                    <AvatarImage src={user.image} alt={user.name} />
                                     <AvatarFallback className='bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 hover:from-purple-600 hover:via-pink-600 hover:to-red-600 text-white'>
                                         {firstLetter}
                                     </AvatarFallback>
                                 </Avatar>
                             </div>
                         )}
-
                         {user!.email && (
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
@@ -140,6 +141,7 @@ export default function Navbar() {
                                         className='relative h-8 w-8 rounded-full'
                                     >
                                         <Avatar className='h-8 w-8 cursor-pointer'>
+                                            <AvatarImage src={user.image} alt={user.name} />
                                             <AvatarFallback className='bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 hover:from-purple-600 hover:via-pink-600 hover:to-red-600 text-white'>
                                                 {firstLetter}
                                             </AvatarFallback>
@@ -150,9 +152,7 @@ export default function Navbar() {
                                     <DropdownMenuLabel className='font-normal'>
                                         <div className='flex flex-col space-y-1'>
                                             <p className='text-sm font-medium leading-none bg-gradient-to-r from-purple-600 via-pink-500 to-red-500 bg-clip-text text-transparent'>
-                                                {
-                                                    user.name
-                                                }
+                                                {user.name}
                                             </p>
                                             <p className='text-xs leading-none text-gray-400'>
                                                 {user?.role}

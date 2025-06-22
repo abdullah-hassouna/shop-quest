@@ -1,8 +1,9 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type { Role } from "@prisma/client";
+import { UserData } from "./user-store";
 
-export interface UserData {
+export interface SettingsDataInterface {
     id: string;
     image: string,
     name: string;

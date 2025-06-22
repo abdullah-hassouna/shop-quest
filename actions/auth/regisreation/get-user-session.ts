@@ -27,7 +27,17 @@ export default async function getUserSession() {
                 sessionToken: userToken
             },
             include: {
-                user: true
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        image: true,
+                        role: true,
+                        createdAt: true,
+                        updatedAt: true
+                    }
+                }
             }
         })
 

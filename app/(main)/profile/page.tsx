@@ -36,12 +36,6 @@ export default function ProfilePage() {
   });
 
   const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 1500);
-    return () => clearTimeout(timer);
-  }, []);
-
   useEffect(() => {
     const fetchData = async () => {
       const { sessionExpired } = await getUserSession();
@@ -56,17 +50,9 @@ export default function ProfilePage() {
           setTotalOrders(prev => (order.total + prev));
           setItemsOrders(prev => [...(order.items || []), ...prev] as OrderItem[]);
         })
-
-
-        // setStats(prev => ({ ...prev, lifetimeOrders: totalOrders }));
-
-        // let lifetimeOrders = 0;
-        // let lifetimeSpent = 0;
-        // let yearlyOrders = 0;
-        // let yearlySpent = 0;
-        // let monthlyOrders = 0;
-        // let monthlySpent = 0;
       }
+
+      setIsLoading(false);
     };
     fetchData();
   }, []);
@@ -87,7 +73,7 @@ export default function ProfilePage() {
             <div className='bg-gray-2 border-2 p-6 rounded-lg shadow-lg '>
               <div className='flex items-center space-x-4'>
                 <Avatar className='relative group cursor-pointer h-24 w-24 text-6xl text-purple-500'>
-                  <AvatarImage src={user.img} alt={user.name} />
+                  <AvatarImage src={user.image} alt={user.name} />
                   <ChangeProfileImgDialog children={<div className='absolute flex justify-center transition-all rounded-full ease-in-out items-center translate-x-[-50%] left-[50%] h-24 w-24 translate-y-[-50%] top-[200%] opacity-50 group-hover:top-[50%] bg-black'>
                     <Edit2 />
                   </div>}>
@@ -100,7 +86,7 @@ export default function ProfilePage() {
                   <h2 className='text-2xl font-semibold text-purple-500'>
                     {user.name}
                   </h2>
-                  <p className='text-gray-500'>{user?.role}</p>
+                  <p className='text-gray-500'>{user.role}</p>
                 </div>
               </div>
             </div>

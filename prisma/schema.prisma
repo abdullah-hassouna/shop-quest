@@ -150,3 +150,16 @@ model OTP {
   expires   DateTime
   createdAt DateTime @default(now())
 }
+
+model Settings {
+  id        String    @id @default(uuid())
+  title     String?   @default("ShopQuest")
+  slug      String?   @default("website-slug")
+  metadata  String?   @default("{}")
+  links     String?   @default("{}")
+  logoDark  String?   @default("")
+  logoLight String?   @default("")
+  favicon   String?   @default("")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
+}
