@@ -29,6 +29,9 @@ model User {
   Order          Order[]
   Notification   Notification[]
   OTP            OTP[]
+  rooms          Room[]         @relation("RoomUsers")
+  roomId         String?
+  Message        Message[]
 }
 
 model Account {
@@ -162,4 +165,21 @@ model Settings {
   favicon   String?   @default("")
   createdAt DateTime  @default(now())
   updatedAt DateTime?
+}
+
+model Room {
+  id        String    @id @default(uuid())
+  users     User[]    @relation("RoomUsers")
+  messages  Message[]
+  createdAt DateTime  @default(now())
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  content   String
+  senderId  String
+  sender    User     @relation(fields: [senderId], references: [id])
+  roomId    String
+  room      Room     @relation(fields: [roomId], references: [id])
+  createdAt DateTime @default(now())
 }

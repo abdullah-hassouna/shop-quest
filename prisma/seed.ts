@@ -67,6 +67,33 @@ async function main() {
             hashedPassword: alicePassword,
         },
     });
+
+    // Create 5 buyers with unique emails and names
+    const buyerInfos = [
+        { email: 'buyer1@prisma.io', name: 'Buyer One' },
+        { email: 'buyer2@prisma.io', name: 'Buyer Two' },
+        { email: 'buyer3@prisma.io', name: 'Buyer Three' },
+        { email: 'buyer4@prisma.io', name: 'Buyer Four' },
+        { email: 'buyer5@prisma.io', name: 'Buyer Five' },
+    ];
+    const buyerPasswords = await Promise.all(
+        buyerInfos.map((_, i) => bcrypt.hash(`buyer${i + 1}password`, 10))
+    );
+    const buyers = [];
+    for (let i = 0; i < buyerInfos.length; i++) {
+        buyers.push(
+            await prisma.user.upsert({
+                where: { email: buyerInfos[i].email },
+                update: {},
+                create: {
+                    email: buyerInfos[i].email,
+                    name: buyerInfos[i].name,
+                    role: 'BUYER',
+                    hashedPassword: buyerPasswords[i],
+                },
+            })
+        );
+    }
     const bobPassword = await bcrypt.hash('bobpassword', 10);
     const bob = await prisma.user.upsert({
         where: { email: 'bob@prisma.io' },
@@ -78,6 +105,37 @@ async function main() {
             hashedPassword: bobPassword,
         },
     });
+
+    // --- Room Seeding Logic ---
+    // Get all users
+    const allUsers = await prisma.user.findMany();
+    // Find admin
+    const admin = allUsers.find(u => u.role === 'ADMIN');
+    if (!admin) throw new Error('No admin user found');
+    // Create public room for all users (including admin)
+    await prisma.room.create({
+        data: {
+            users: {
+                connect: allUsers.map(u => ({ id: u.id }))
+            },
+            // Optionally, you can add a field to distinguish public rooms if you add it to the schema
+        }
+    });
+    // Create private room for each user (except admin) with the admin
+    for (const user of allUsers) {
+        if (user.id !== admin.id) {
+            await prisma.room.create({
+                data: {
+                    users: {
+                        connect: [
+                            { id: admin.id },
+                            { id: user.id }
+                        ]
+                    }
+                }
+            });
+        }
+    }
 
     await prisma.product.create({
         data: {

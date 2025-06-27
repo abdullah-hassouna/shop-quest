@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ShoppingCart, User, Menu, X, LogOut } from 'lucide-react';
+import { ShoppingCart, User, Menu, X, LogOut, Bell, LayoutDashboardIcon } from 'lucide-react';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -19,8 +19,15 @@ import logoutAction from '@/actions/auth/regisreation/logout-action';
 import { useRouter } from 'next/navigation';
 import useCartStore from '@/store/cart-store';
 import useUserDataStore, { UserData, UserState } from '@/store/user-store';
-
-export default function Navbar() {
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import NotificationTable from './NotificationTable';
+import { useAnnouncementStore } from '@/store/announcement-store';
+import { useSocket } from '@/hooks/useSocket';
+interface NavbarProps {
+    // Replace this with your actual user rooms logic
+    userRooms?: string[];
+}
+export default function Navbar({ userRooms }: NavbarProps) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [isLoading, setIsLoading] = useState(true);
@@ -29,24 +36,33 @@ export default function Navbar() {
     const cartItems = useCartStore((state) => state.cart);
     const { user, addUser, removeUser } = useUserDataStore((state: UserState) => state);
     const [firstLetter, setFirstLetter] = useState<string>("U");
+    const [showNotifications, setShowNotifications] = useState(false);
+    const {
+        announcements,
+        unreadCount,
+        isConnected,
+        markAllAsRead,
+        connectedRooms
+    } = useAnnouncementStore();
 
-    useEffect(() => {
-        async function fetchUser() {
-            try {
-                setIsLoading(true);
-                const { userData, } = (await getUserSession());
-                setFirstLetter(userData?.name?.split(" ").map(char => char.toLocaleUpperCase()).join("")[0] || "U");
-                console.log(userData)
-                if (userData) addUser(userData as unknown as UserData);
-                setIsLoading(false);
-            } catch (error) {
-                console.error({ error });
-                removeUser()
-                setIsLoading(false);
-            }
+    // Initialize socket with user rooms
+    useSocket(userRooms);
+
+    const handleNotificationClick = () => {
+        setShowNotifications(!showNotifications);
+        if (!showNotifications && unreadCount > 0) {
+            markAllAsRead();
         }
-        fetchUser();
-    }, []);
+    };
+
+    const getAnnouncementTypeColor = (type: string) => {
+        switch (type) {
+            case 'success': return 'text-green-600 bg-green-50';
+            case 'warning': return 'text-yellow-600 bg-yellow-50';
+            case 'error': return 'text-red-600 bg-red-50';
+            default: return 'text-blue-600 bg-blue-50';
+        }
+    };
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -107,20 +123,99 @@ export default function Navbar() {
                             </form>
                         </div>
 
-                        <div>
-                            <Link href='/cart' onClick={handleMenuItemClick}>
-                                <Button
-                                    size='icon'
-                                    className='relative bg-transparent hover:bg-transparent cursor-pointer pt-2'
-                                    variant='ghost'
+                        <div className='flex items-center space-x-4 relative'>
+                            {user.role &&
+                                < Link
+                                    href='/dashboard'
+                                    className='text-gray-600 hover:text-purple-500'
                                 >
-                                    <ShoppingCart className='h-5 w-5 text-gray-600 hover:text-purple-500' />
-                                    {cartItems.length > 0 && (
-                                        <span className='absolute top-[-3px] right-[-3px] inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full'>
-                                            {cartItems.length}
-                                        </span>
+                                    <LayoutDashboardIcon />
+                                </Link>}
+
+                            <div className="flex items-center space-x-4">
+                                {/* Connection Status */}
+                                <div className="flex items-center space-x-2">
+                                    <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                                    <span className="text-sm text-gray-600">
+                                        {isConnected ? 'Connected' : 'Disconnected'}
+                                    </span>
+                                </div>
+
+                                {/* Connected Rooms */}
+                                <div className="text-sm text-gray-500">
+                                    Rooms: {connectedRooms.join(', ') || 'None'}
+                                </div>
+
+                                {/* Notification Bell */}
+                                <div className="relative">
+                                    <button
+                                        onClick={handleNotificationClick}
+                                        className="relative p-2 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                    >
+                                        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                        </svg>
+
+                                        {unreadCount > 0 && (
+                                            <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center">
+                                                {unreadCount > 99 ? '99+' : unreadCount}
+                                            </span>
+                                        )}
+                                    </button>
+
+                                    {/* Notifications Dropdown */}
+                                    {showNotifications && (
+                                        <div className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50">
+                                            <div className="py-1 max-h-96 overflow-y-auto">
+                                                <div className="px-4 py-2 border-b border-gray-200">
+                                                    <h3 className="text-sm font-medium text-gray-900">
+                                                        Announcements ({announcements.length})
+                                                    </h3>
+                                                </div>
+
+                                                {announcements.length === 0 ? (
+                                                    <div className="px-4 py-3 text-sm text-gray-500 text-center">
+                                                        No announcements yet
+                                                    </div>
+                                                ) : (
+                                                    announcements.map((announcement) => (
+                                                        <div
+                                                            key={announcement.id}
+                                                            className={`px-4 py-3 border-b border-gray-100 ${getAnnouncementTypeColor(announcement.type)}`}
+                                                        >
+                                                            <div className="flex justify-between items-start">
+                                                                <div className="flex-1">
+                                                                    <p className="text-sm font-medium text-gray-900">
+                                                                        {announcement.message}
+                                                                    </p>
+                                                                    <p className="text-xs text-gray-500 mt-1">
+                                                                        From: {announcement.adminName} • Room: {announcement.roomId}
+                                                                    </p>
+                                                                    <p className="text-xs text-gray-500">
+                                                                        {new Date(announcement.timestamp).toLocaleString()}
+                                                                    </p>
+                                                                </div>
+                                                                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getAnnouncementTypeColor(announcement.type)}`}>
+                                                                    {announcement.type}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    ))
+                                                )}
+                                            </div>
+                                        </div>
                                     )}
-                                </Button>
+                                </div>
+                            </div>
+
+
+                            <Link href='/cart' onClick={handleMenuItemClick}>
+                                <ShoppingCart className='h-5 w-5 text-gray-600 hover:text-purple-500' />
+                                {cartItems.length > 0 && (
+                                    <span className='absolute top-[-3px] right-[-3px] inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full'>
+                                        {cartItems.length}
+                                    </span>
+                                )}
                             </Link>
                         </div>
                         {isLoading && (
@@ -218,92 +313,100 @@ export default function Navbar() {
                 </div>
             </div>
 
-            {isMobileMenuOpen && (
-                <div ref={mobileMenuRef} className='md:hidden bg-gray-100'>
-                    <div className='px-2 pt-2 pb-3 space-y-1 sm:px-3'>
-                        <form onSubmit={handleSearch} className='mb-4'>
-                            <Input
-                                type='text'
-                                placeholder='Search products...'
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className='bg-white  '
-                            />
-                        </form>
+            {
+                isMobileMenuOpen && (
+                    <div ref={mobileMenuRef} className='md:hidden bg-gray-100'>
+                        <div className='px-2 pt-2 pb-3 space-y-1 sm:px-3'>
+                            <form onSubmit={handleSearch} className='mb-4'>
+                                <Input
+                                    type='text'
+                                    placeholder='Search products...'
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className='bg-white  '
+                                />
+                            </form>
 
-                        <Link
-                            href='/cart'
-                            className='block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-white hover:bg-purple-500'
-                            onClick={handleMenuItemClick}
-                        >
-                            Cart
-                        </Link>
-                    </div>
-                    <div className='border-t border-gray-700 pt-4 pb-3'>
-                        {user!.email && (
-                            <div className='flex items-center px-5 mb-3'>
-                                <div className='flex-shrink-0'>
-                                    <Avatar className='h-8 w-8 border-2 border-gray-700'>
-                                        <AvatarFallback>
-                                            {user.name?.split(" ").map(char => char.toLocaleUpperCase()).join("")}
-                                        </AvatarFallback>
-                                    </Avatar>
-                                </div>
-                                <div className='ml-3'>
-                                    <div className='text-base font-medium bg-gradient-to-r from-purple-600 via-pink-500 to-red-500 bg-clip-text text-transparent'>
-                                        {user.name}
-                                    </div>
-                                    <div className='text-sm font-medium text-gray-500'>
-                                        {user?.role}
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                        {user!.email ? (
-                            <div className='mt-3 px-2 space-y-1'>
-                                <Link
-                                    href='/profile'
-                                    className='block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-white hover:bg-purple-500'
-                                    onClick={handleMenuItemClick}
-                                >
-                                    Your Profile
-                                </Link>
+                            <Popover>
+                                <PopoverTrigger>Open</PopoverTrigger>
+                                <PopoverContent>Place content for the popover here.</PopoverContent>
+                            </Popover>
 
-                                <Link
-                                    href='/orders'
-                                    className='block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-white hover:bg-purple-500'
-                                    onClick={handleMenuItemClick}
-                                >
-                                    Orders
-                                </Link>
-                                <button
-                                    onClick={handleLogout}
-                                    className='block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-white hover:bg-purple-500 w-full text-left cursor-pointer'
-                                >
-                                    Log out
-                                </button>
-                            </div>
-                        ) : (
-                            <div className='mt-3 px-2 space-y-1'>
-                                <Link
-                                    href='/auth?type=login'
-                                    className='block px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-purple-500'
-                                    onClick={handleMenuItemClick}
-                                >
-                                    Login
-                                </Link>
-                                <Link
-                                    href='/auth?type=signup'
-                                    className='block px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-purple-500'
-                                    onClick={handleMenuItemClick}
-                                >
-                                    Sign Up
-                                </Link>
-                            </div>
-                        )}
+
+                            <Link
+                                href='/cart'
+                                className='block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-white hover:bg-purple-500'
+                                onClick={handleMenuItemClick}
+                            >
+                                Cart
+                            </Link>
+                        </div>
+                        <div className='border-t border-gray-700 pt-4 pb-3'>
+                            {user!.email && (
+                                <div className='flex items-center px-5 mb-3'>
+                                    <div className='flex-shrink-0'>
+                                        <Avatar className='h-8 w-8 border-2 border-gray-700'>
+                                            <AvatarFallback>
+                                                {user.name?.split(" ").map(char => char.toLocaleUpperCase()).join("")}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                    </div>
+                                    <div className='ml-3'>
+                                        <div className='text-base font-medium bg-gradient-to-r from-purple-600 via-pink-500 to-red-500 bg-clip-text text-transparent'>
+                                            {user.name}
+                                        </div>
+                                        <div className='text-sm font-medium text-gray-500'>
+                                            {user?.role}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                            {user!.email ? (
+                                <div className='mt-3 px-2 space-y-1'>
+                                    <Link
+                                        href='/profile'
+                                        className='block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-white hover:bg-purple-500'
+                                        onClick={handleMenuItemClick}
+                                    >
+                                        Your Profile
+                                    </Link>
+
+                                    <Link
+                                        href='/orders'
+                                        className='block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-white hover:bg-purple-500'
+                                        onClick={handleMenuItemClick}
+                                    >
+                                        Orders
+                                    </Link>
+                                    <button
+                                        onClick={handleLogout}
+                                        className='block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-white hover:bg-purple-500 w-full text-left cursor-pointer'
+                                    >
+                                        Log out
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className='mt-3 px-2 space-y-1'>
+                                    <Link
+                                        href='/auth?type=login'
+                                        className='block px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-purple-500'
+                                        onClick={handleMenuItemClick}
+                                    >
+                                        Login
+                                    </Link>
+                                    <Link
+                                        href='/auth?type=signup'
+                                        className='block px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-purple-500'
+                                        onClick={handleMenuItemClick}
+                                    >
+                                        Sign Up
+                                    </Link>
+                                </div>
+                            )}
+                        </div>
                     </div>
-                </div>
-            )}
-        </nav>
+                )
+            }
+        </nav >
     );
 }

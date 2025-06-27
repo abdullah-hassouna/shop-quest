@@ -14,8 +14,6 @@ export default async function getUserSession() {
 
         const userToken = (await cookies()).get('token')?.value;
 
-        console.log("userToken:", userToken)
-
         if (!userToken) return {
             success: true,
             sessionExpired: true,

@@ -10,7 +10,7 @@ import ProductCatalog from '@/components/ProductCategory';
 import { getRelatedProducts } from '@/actions/products/get-related-products';
 import { toast } from 'sonner';
 import { ProductInterface } from '@/types/product-type';
-import ImagesCarousel from '@/components/Carousel/ImagesEmblaCarousel';
+import ImagesCarousel from '@/components/carousel/ImagesEmblaCarousel';
 import { Image } from '@prisma/client';
 // import { IProductsEntity } from 'oneentry/dist/products/productsInterfaces';
 

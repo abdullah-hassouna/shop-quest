@@ -1,6 +1,6 @@
 import React from 'react';
 import { ProductInterface } from '@/types/product-type';
-import EmblaCarousel from './Carousel/ProductsEmblaCarousel';
+import EmblaCarousel from './carousel/ProductsEmblaCarousel';
 import { EmblaOptionsType } from 'embla-carousel'
 import type { Category } from '@prisma/client';
 import clsx from 'clsx';
