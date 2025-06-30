@@ -1,6 +1,6 @@
 'use server';
-
 import prisma from "@/lib/prisma";
+import { UserDataInterface } from "@/types/user-data-type";
 import { cookies } from 'next/headers';
 
 function isExpired(expiryDate: Date | null): boolean {
@@ -9,7 +9,12 @@ function isExpired(expiryDate: Date | null): boolean {
     return expiryDate < currentDate;
 }
 
-export default async function getUserSession() {
+
+export default async function getUserSession(): Promise<{
+    success: boolean;
+    sessionExpired: boolean;
+    userData: UserDataInterface | null;
+}> {
     try {
 
         const userToken = (await cookies()).get('token')?.value;
@@ -32,8 +37,7 @@ export default async function getUserSession() {
                         email: true,
                         image: true,
                         role: true,
-                        createdAt: true,
-                        updatedAt: true
+                        rooms: true,
                     }
                 }
             }
@@ -50,7 +54,7 @@ export default async function getUserSession() {
         return {
             success: true,
             sessionExpired: false,
-            userData: userData.user
+            userData: userData.user as UserDataInterface
         }
     } catch (error) {
         console.error("Error fetching user session:", error);

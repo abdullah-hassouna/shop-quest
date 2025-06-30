@@ -1,18 +1,17 @@
 import { useEffect, useRef } from 'react';
 import io from 'socket.io-client';
-import type { Socket } from 'socket.io-client';
 import { useAnnouncementStore } from '@/store/announcement-store';
-import { ServerToClientEvents, ClientToServerEvents } from '@/types/socket';
+import { Room } from '@prisma/client';
 
 // type ClientSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
 
-export const useSocket = (userRooms: string[] = []) => {
+export const useSocket = (userRooms: Room[] = []) => {
     const socketRef = useRef<any | null>(null);
     const { addAnnouncement, setConnectedRooms, setConnectionStatus } = useAnnouncementStore();
-
+    let formattedRooms: string[]
     useEffect(() => {
-        // Initialize socket connection
         const initSocket = async () => {
+            formattedRooms = userRooms.map(room => room.id)
             await fetch('/api/socket');
 
             socketRef.current = io({
@@ -26,11 +25,12 @@ export const useSocket = (userRooms: string[] = []) => {
                 setConnectionStatus(true);
 
                 // Join user rooms
-                userRooms.forEach(roomId => {
+                formattedRooms.forEach(roomId => {
                     socket.emit('join_room', roomId);
                 });
 
-                setConnectedRooms(userRooms);
+                console.log(formattedRooms)
+                setConnectedRooms(formattedRooms);
             });
 
             socket.on('disconnect', () => {
@@ -55,6 +55,7 @@ export const useSocket = (userRooms: string[] = []) => {
 
     // Update rooms when userRooms changes
     useEffect(() => {
+        console.log("socketRef.current: ", socketRef.current)
         if (socketRef.current && socketRef.current.connected) {
             const socket = socketRef.current;
 
@@ -63,7 +64,7 @@ export const useSocket = (userRooms: string[] = []) => {
                 socket.emit('join_room', roomId);
             });
 
-            setConnectedRooms(userRooms);
+            setConnectedRooms(formattedRooms);
         }
     }, [userRooms, setConnectedRooms]);
 

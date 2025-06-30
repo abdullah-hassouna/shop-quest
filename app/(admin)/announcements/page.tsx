@@ -3,12 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
 import { AnnouncementData } from '@/types/socket';
+import { ChatRoomInterface, getUserRooms } from '@/actions/chat-rooms/get-user-rooms';
 
 type AdminSocket = any;
 
 const AdminAnnouncements: React.FC = () => {
     const [socket, setSocket] = useState<AdminSocket | null>(null);
     const [isConnected, setIsConnected] = useState(false);
+    const [availableRooms, setAvailableRooms] = useState<ChatRoomInterface[]>([])
     const [formData, setFormData] = useState({
         message: '',
         roomId: 'general',
@@ -16,14 +18,15 @@ const AdminAnnouncements: React.FC = () => {
         adminName: 'Admin'
     });
 
-    // Available rooms - replace with your actual rooms logic
-    const availableRooms = [
-        { id: 'general', name: 'General' },
-        { id: 'vip-customers', name: 'VIP Customers' },
-        { id: 'new-arrivals', name: 'New Arrivals' },
-        { id: 'sales', name: 'Sales & Promotions' },
-        { id: 'support', name: 'Customer Support' }
-    ];
+    useEffect(() => {
+        const callAvailableRooms = async () => {
+            const { error, success, userRooms } = await getUserRooms()
+            if (success && !error && userRooms) {
+                setAvailableRooms(userRooms)
+            }
+        }
+        callAvailableRooms()
+    }, [])
 
     useEffect(() => {
         const initSocket = async () => {
@@ -65,7 +68,6 @@ const AdminAnnouncements: React.FC = () => {
             message: formData.message.trim(),
             roomId: formData.roomId,
             timestamp: new Date(),
-            adminName: formData.adminName,
             type: formData.type
         };
 
@@ -77,7 +79,6 @@ const AdminAnnouncements: React.FC = () => {
             message: ''
         });
 
-        alert(`Announcement sent to room: ${formData.roomId}`);
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -136,7 +137,7 @@ const AdminAnnouncements: React.FC = () => {
                                 >
                                     {availableRooms.map((room) => (
                                         <option key={room.id} value={room.id}>
-                                            {room.name}
+                                            {room.users![1].name}
                                         </option>
                                     ))}
                                 </select>
@@ -201,7 +202,7 @@ const AdminAnnouncements: React.FC = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {availableRooms.map((room) => (
                                 <div key={room.id} className="p-4 border border-gray-200 rounded-lg">
-                                    <h3 className="font-medium text-gray-900">{room.name}</h3>
+                                    <h3 className="font-medium text-gray-900">{room.users![1].name}</h3>
                                     <p className="text-sm text-gray-500">Room ID: {room.id}</p>
                                 </div>
                             ))}

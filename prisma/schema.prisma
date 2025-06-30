@@ -183,3 +183,18 @@ model Message {
   room      Room     @relation(fields: [roomId], references: [id])
   createdAt DateTime @default(now())
 }
+
+enum AnoouncementType {
+  INFO
+  WARNING
+  SUCCESS
+  ERROR
+}
+
+model Anoouncement {
+  id        String           @id @default(uuid())
+  message   String
+  type      AnoouncementType
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+}

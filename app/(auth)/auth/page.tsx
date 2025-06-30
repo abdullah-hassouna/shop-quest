@@ -11,7 +11,7 @@ export default function AuthPage() {
     const [isSignUp, setIsSignUp] = React.useState<boolean>(false);
     const router = useRouter();
     const searchParams = useSearchParams();
-    const newAccount = searchParams.get("new-account");
+    const newAccount = searchParams!.get("new-account");
 
     useEffect(() => {
         if (newAccount === "1") {
@@ -20,7 +20,7 @@ export default function AuthPage() {
     }, [newAccount]);
 
     const toggleForm = () => {
-        const params = new URLSearchParams(searchParams.toString())
+        const params = new URLSearchParams(searchParams!.toString())
         if (isSignUp) {
             setIsSignUp(_ => false);
             params.delete("new-account");

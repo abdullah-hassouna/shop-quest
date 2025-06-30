@@ -1,18 +1,10 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import type { Role } from "@prisma/client";
-
-export interface UserData {
-    id: string;
-    image: string,
-    name: string;
-    email: string;
-    role: Role
-}
+import { UserDataInterface } from "@/types/user-data-type";
 
 export interface UserState {
-    user: UserData;
-    addUser: (newUser: UserData) => void;
+    user: UserDataInterface;
+    addUser: (newUser: UserDataInterface) => void;
     removeUser: () => void;
     changeImg: (newImgUrl: string) => void;
     changeName: (newName: string) => void;
@@ -23,8 +15,7 @@ const useUserDataStore = create<UserState>()(
     persist(
         (set, get) => ({
             user: {
-                name: "", email: "", role: "BUYER", id: "",
-                image: ""
+                name: "", email: "", role: "BUYER", id: "", image: "", rooms: []
             },
             changeImg: (newImgUrl: string) => {
                 const user = get().user;
@@ -37,8 +28,7 @@ const useUserDataStore = create<UserState>()(
                 if (user.email && user.name) {
                     set({
                         user: {
-                            id: user.id, name: newName, email: user.email, role: user.role,
-                            image: ""
+                            id: user.id, name: newName, email: user.email, role: user.role, image: "", rooms: []
                         }
                     });
                 }
@@ -55,18 +45,16 @@ const useUserDataStore = create<UserState>()(
                 localStorage.removeItem("user-data-storage");
                 set({
                     user: {
-                        name: "", email: "", role: "BUYER",
-                        id: "",
-                        image: ""
+                        name: "", email: "", role: "BUYER", id: "", image: "", rooms: []
                     }
                 });
             },
 
-            addUser: (newUser: UserData) => {
+            addUser: (newUser: UserDataInterface) => {
                 set({
                     user: {
                         id: newUser.id, email: newUser.email, name: newUser.name, role: newUser.role,
-                        image: newUser.image
+                        image: newUser.image, rooms: newUser.rooms || []
                     }
                 });
             },
