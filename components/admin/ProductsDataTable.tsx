@@ -1,18 +1,17 @@
 "use client";
 
-import { useState, useEffect, useCallback, MouseEvent } from 'react';
-import { getAllUsers, getAllUsersPages } from "@/actions/admin/users/get-all-users";
-import { GetUserDataResponse } from "@/types/get-user-data-response"
-import { Button } from './ui/button';
-import { Badge } from './ui/badge';
+import { useState, useEffect, useCallback } from 'react';
+import { getAllProducts, getAllProductsPages } from "@/actions/admin/products/get-all-products";
+import { GetProductDataResponse } from "@/types/get-data-response"
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { Table, TableBody, TableHeader } from './ui/table';
+import { Table, TableBody, TableHeader } from '@/components/ui/table';
 import { ArrowDown, ArrowLeft, MoreVertical, ShieldCheck } from 'lucide-react';
-import { Input } from './ui/input';
-import UserActionDialog from './dialogs/user-actions';
+import { Input } from '@/components/ui/input';
 
 interface EnhancedDataTableProps {
-    data: GetUserDataResponse[];
+    data: GetProductDataResponse[];
     initialMaxPagesCount: number;
     tableConfig: {
         defaultPageSize: number;
@@ -25,12 +24,12 @@ interface OrderBy {
     sort: 'asc' | 'desc'
 }
 
-export function DataTable({
+export function ProductsDataTable({
     data: initialData,
     initialMaxPagesCount,
     tableConfig
 }: EnhancedDataTableProps) {
-    const [users, setUsers] = useState<GetUserDataResponse[]>(initialData);
+    const [products, setProducts] = useState<GetProductDataResponse[]>(initialData);
     const [page, setPage] = useState<number>(1);
     const [maxPagesCount, setMaxPagesCount] = useState<number>(initialMaxPagesCount);
     const [pageTakeNum, setPagesTakeNum] = useState<number>(tableConfig.defaultPageSize);
@@ -59,59 +58,56 @@ export function DataTable({
             cell: ({ row }: { row: any }) => row.getValue('name'),
         },
         {
-            title: "Email",
-            accessorKey: 'email',
+            title: "Price",
+            accessorKey: 'price',
             header: HeaderCell,
-            cell: ({ row }: { row: any }) => <div className='flex items-center gap-2'>
-                {row.getValue('emailVerified') && <ShieldCheck className='w-4 h-4' />}
-                <span>
-                    {row.getValue('email')}
-                </span>
-            </div>,
+            cell: ({ row }: { row: any }) => `$${row.getValue('price')}`,
         },
         {
-            title: "Role",
-            accessorKey: 'role',
+            title: "Description",
+            accessorKey: 'description',
             header: HeaderCell,
-            cell: ({ row }: { row: any }) => <Badge className={cn("capitalize", { "bg-blue-500": (row.getValue('role') === "ADMIN") })}>{row.getValue('role').toLowerCase()}</Badge>,
+            cell: ({ row }: { row: any }) => row.getValue('description'),
         },
         {
-            title: "Created at",
+            title: "Images",
+            accessorKey: 'imagesId',
+            header: () => <span className="mr-2">Images</span>,
+            cell: ({ row }: { row: any }) => row.getValue('imagesId')[0].url,
+        },
+        {
+            title: "Added By",
+            accessorKey: 'seller',
+            header: HeaderCell,
+            cell: ({ row }: { row: any }) => row.getValue('seller').name,
+        },
+        {
+            title: "Category",
+            accessorKey: 'category',
+            header: HeaderCell,
+            cell: ({ row }: { row: any }) => <Badge className='flex justify-between items-center' style={{ background: row.getValue('category').color }}>
+                {row.getValue('category').name}
+                {row.getValue('category').icon ? <img src={row.getValue('category').icon} className='w-3 h-3' /> : <></>}
+            </Badge>,
+        },
+        {
+            title: "Tags",
+            accessorKey: 'tags',
+            header: () => <span className="mr-2">Tags</span>,
+            cell: ({ row }: { row: any }) => row.getValue('tags')[0].name,
+        },
+        {
+            title: "Added At",
             accessorKey: 'createdAt',
             header: HeaderCell,
-            cell: ({ row }: { row: any }) => new Date(row.getValue('createdAt')).toLocaleDateString(),
-        },
-        {
-            title: "Updated at",
-            accessorKey: 'updatedAt',
-            header: HeaderCell,
-            cell: ({ row }: { row: any }) => new Date(row.getValue('updatedAt')).toLocaleDateString(),
-        },
-        {
-            title: "Actions",
-            accessorKey: 'actions',
-            header: () => <>Actions</>,
-            cell: ({ row }: { row: any }) => (
-                <UserActionDialog user={{
-                    id: row.getValue("id"),
-                    name: row.getValue("name"),
-                    image: row.getValue("image"),
-                    email: row.getValue("email"),
-                    emailVerified: row.getValue("emailVerified"),
-                    role: row.getValue("role").toLowerCase(),
-                    sessions: row.getValue("sessions"),
-                    createdAt: row.getValue("createdAt"),
-                    updatedAt: row.getValue("updatedAt")
-                }} >
-                    <MoreVertical />
-                </UserActionDialog>
-            ),
+            cell: ({ row }: { row: any }) => row.getValue('createdAt').toLocaleDateString(),
         },
     ];
 
 
     const NextPage = () => {
         console.log(page)
+        console.log(initialMaxPagesCount)
         if ((page < initialMaxPagesCount)) {
             setPage(page + 1)
         }
@@ -129,17 +125,17 @@ export function DataTable({
         setError(null);
 
         try {
-            const { data, error, success } = await getAllUsers(
+            const { data, error, success } = await getAllProducts(
                 pageNum,
                 take,
                 searchQuery,
                 orderByObj
             );
             if (success && data) {
-                setUsers(data);
+                setProducts(data);
             } else if (error) {
-                setError(`Error fetching users: ${error}`);
-                console.error("Error fetching users:", error);
+                setError(`Error fetching products: ${error}`);
+                console.error("Error fetching products:", error);
             }
         } catch (err) {
             setError('Unexpected error occurred');
@@ -151,7 +147,7 @@ export function DataTable({
 
     const callPagesNumber = useCallback(async (take: number = 5, searchQuery: string = "") => {
         try {
-            const { data, error, success } = await getAllUsersPages(take, searchQuery);
+            const { data, error, success } = await getAllProductsPages(take, searchQuery);
             if (success && data) {
                 setMaxPagesCount(data);
             } else if (error) {
@@ -198,12 +194,12 @@ export function DataTable({
 
     return (
         <div className="space-y-4">
-            {loading && (
+            {(loading && !(products.length)) ? (
                 <div className="flex justify-center items-center p-4">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
                     <span className="ml-2">Loading...</span>
                 </div>
-            )}
+            ) : ""}
 
             {error && (
                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
@@ -230,11 +226,11 @@ export function DataTable({
                         </tr>
                     </TableHeader>
                     <TableBody className="divide-y divide-gray-200">
-                        {users.map((user, rowIndex) => (
+                        {products.map((user, rowIndex) => (
                             <tr onClick={(e) => toggleToSelected(e, user.id as string)} key={user.id || rowIndex} className={cn("hover:bg-gray-50", { "bg-gray-100": selectedList.find((OldId) => OldId == user.id) })}>
                                 {columns.map((column, colIndex) => (
                                     <td key={colIndex} className="cursor-pointer px-4 py-2 text-sm text-gray-900">
-                                        {column.cell ? column.cell({ row: { getValue: (key: string) => user[key as keyof GetUserDataResponse] } }) : user[column.accessorKey as keyof GetUserDataResponse]}
+                                        {column.cell ? column.cell({ row: { getValue: (key: string) => user[key as keyof GetProductDataResponse] } }) : user[column.accessorKey as keyof GetProductDataResponse]}
                                     </td>
                                 ))}
                             </tr>

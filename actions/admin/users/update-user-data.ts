@@ -2,7 +2,7 @@
 
 import prisma from '@/lib/prisma';
 import { ActionReturnType } from '@/types/actions-return-type';
-import { GetUserDataResponse } from '@/types/get-user-data-response';
+import { GetUserDataResponse } from '@/types/get-data-response';
 import bcrypt from 'bcryptjs';
 import { cache } from 'react';
 

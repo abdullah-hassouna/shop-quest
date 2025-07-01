@@ -6,7 +6,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
-import { GetUserDataResponse } from '@/types/get-user-data-response'
+import { GetUserDataResponse } from '@/types/get-data-response'
 import { updateUserData } from '@/actions/admin/users/update-user-data'
 import { Formik } from 'formik'
 import { Label } from '../ui/label'
