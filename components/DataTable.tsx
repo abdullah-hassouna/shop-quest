@@ -1,17 +1,18 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, MouseEvent } from 'react';
 import { getAllUsers, getAllUsersPages } from "@/actions/admin/users/get-all-users";
-import { GetAllUsersResponse } from "@/types/get-all-users-response";
+import { GetUserDataResponse } from "@/types/get-user-data-response"
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { cn } from '@/lib/utils';
 import { Table, TableBody, TableHeader } from './ui/table';
-import { ArrowDown, ArrowLeft, MoreVertical } from 'lucide-react';
+import { ArrowDown, ArrowLeft, MoreVertical, ShieldCheck } from 'lucide-react';
 import { Input } from './ui/input';
+import UserActionDialog from './dialogs/user-actions';
 
 interface EnhancedDataTableProps {
-    data: GetAllUsersResponse[];
+    data: GetUserDataResponse[];
     initialMaxPagesCount: number;
     tableConfig: {
         defaultPageSize: number;
@@ -29,23 +30,24 @@ export function DataTable({
     initialMaxPagesCount,
     tableConfig
 }: EnhancedDataTableProps) {
-    const [users, setUsers] = useState<GetAllUsersResponse[]>(initialData);
+    const [users, setUsers] = useState<GetUserDataResponse[]>(initialData);
     const [page, setPage] = useState<number>(1);
     const [maxPagesCount, setMaxPagesCount] = useState<number>(initialMaxPagesCount);
     const [pageTakeNum, setPagesTakeNum] = useState<number>(tableConfig.defaultPageSize);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
-    const [orderBy, setOrderBy] = useState<OrderBy>({ order: "role", sort: "asc" });
+    const [orderBy, setOrderBy] = useState<OrderBy | null>(null);
     const [search, setSearch] = useState<string>("");
+    const [selectedList, setSelectedList] = useState<string[]>([]);
 
 
     const changeOrderBy = (column: string) => {
-        setOrderBy({ order: column, sort: orderBy.sort === "asc" ? "desc" : "asc" })
+        setOrderBy(orderBy?.sort == "desc" ? null : { order: column, sort: orderBy?.sort === "asc" ? "desc" : "asc" })
     }
 
     const HeaderCell = ({ title, column }: { title: string, column: string }) => <Button onClick={() => changeOrderBy(column)} className='space-x-2' variant={"ghost"}>
         <span className="mr-2">{title}</span>
-        {orderBy.order === column && <ArrowDown className={cn("h-4 w-4", { "rotate-180": orderBy.order === column && orderBy.sort === "desc" })} />}
+        {orderBy?.order === column && <ArrowDown className={cn("h-4 w-4", { "rotate-180": orderBy?.order === column && orderBy?.sort === "desc" })} />}
     </Button>
 
 
@@ -60,7 +62,12 @@ export function DataTable({
             title: "Email",
             accessorKey: 'email',
             header: HeaderCell,
-            cell: ({ row }: { row: any }) => row.getValue('email'),
+            cell: ({ row }: { row: any }) => <div className='flex items-center gap-2'>
+                {row.getValue('emailVerified') && <ShieldCheck className='w-4 h-4' />}
+                <span>
+                    {row.getValue('email')}
+                </span>
+            </div>,
         },
         {
             title: "Role",
@@ -85,9 +92,19 @@ export function DataTable({
             accessorKey: 'actions',
             header: () => <>Actions</>,
             cell: ({ row }: { row: any }) => (
-                <Button variant={"outline"} onClick={() => alert(row.getValue("id"))} >
+                <UserActionDialog user={{
+                    id: row.getValue("id"),
+                    name: row.getValue("name"),
+                    image: row.getValue("image"),
+                    email: row.getValue("email"),
+                    emailVerified: row.getValue("emailVerified"),
+                    role: row.getValue("role").toLowerCase(),
+                    sessions: row.getValue("sessions"),
+                    createdAt: row.getValue("createdAt"),
+                    updatedAt: row.getValue("updatedAt")
+                }} >
                     <MoreVertical />
-                </Button>
+                </UserActionDialog>
             ),
         },
     ];
@@ -107,7 +124,7 @@ export function DataTable({
         }
     }
 
-    const callAllUsers = useCallback(async (pageNum: number, take: number = 5, searchQuery: string = "", orderByObj: OrderBy) => {
+    const callAllUsers = useCallback(async (pageNum: number, take: number = 5, searchQuery: string = "", orderByObj: OrderBy | null) => {
         setLoading(true);
         setError(null);
 
@@ -168,6 +185,17 @@ export function DataTable({
         callPagesNumber(pageTakeNum, search);
     }, [pageTakeNum, callPagesNumber, tableConfig.defaultPageSize]);
 
+    function toggleToSelected(e: any, id: string): void {
+        e.stopPropagation()
+        setSelectedList(() => {
+            const filtered = selectedList.filter(oldId => oldId !== id);
+            if (filtered.length === selectedList.length) {
+                return [...selectedList, id]
+            }
+            return filtered
+        })
+    }
+
     return (
         <div className="space-y-4">
             {loading && (
@@ -183,8 +211,14 @@ export function DataTable({
                 </div>
             )}
 
-            <div>
+            <div className='flex gap-2'>
                 <Input placeholder='Search' value={search} onChange={(e) => setSearch((e.target.value).trim())} />
+                {
+                    selectedList.length ?
+                        <div>
+                            <Button>Action: {selectedList.length}</Button>
+                        </div> : <></>
+                }
             </div>
 
             <div className="border rounded-lg overflow-hidden">
@@ -197,10 +231,10 @@ export function DataTable({
                     </TableHeader>
                     <TableBody className="divide-y divide-gray-200">
                         {users.map((user, rowIndex) => (
-                            <tr key={user.id || rowIndex} className="hover:bg-gray-50">
+                            <tr onClick={(e) => toggleToSelected(e, user.id as string)} key={user.id || rowIndex} className={cn("hover:bg-gray-50", { "bg-gray-100": selectedList.find((OldId) => OldId == user.id) })}>
                                 {columns.map((column, colIndex) => (
-                                    <td key={colIndex} className="px-4 py-2 text-sm text-gray-900">
-                                        {column.cell ? column.cell({ row: { getValue: (key: string) => user[key as keyof GetAllUsersResponse] } }) : user[column.accessorKey as keyof GetAllUsersResponse]}
+                                    <td key={colIndex} className="cursor-pointer px-4 py-2 text-sm text-gray-900">
+                                        {column.cell ? column.cell({ row: { getValue: (key: string) => user[key as keyof GetUserDataResponse] } }) : user[column.accessorKey as keyof GetUserDataResponse]}
                                     </td>
                                 ))}
                             </tr>

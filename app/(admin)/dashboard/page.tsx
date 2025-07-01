@@ -1,5 +1,5 @@
 import { DataTable } from "@/components/DataTable";
-import { GetAllUsersResponse } from "@/types/get-all-users-response";
+import { GetUserDataResponse } from "@/types/get-user-data-response";
 import { getAllUsers, getAllUsersPages } from "@/actions/admin/users/get-all-users";
 
 export const dynamic = 'force-static';
@@ -10,7 +10,7 @@ export default async function AdminDashboard() {
     const defaultPageSize = 5;
     const initialPage = 1;
 
-    let initialUsers: GetAllUsersResponse[] = [];
+    let initialUsers: GetUserDataResponse[] = [];
     let initialMaxPagesCount = 1;
     let error: string | null = null;
 
@@ -48,7 +48,6 @@ export default async function AdminDashboard() {
             )}
 
             <DataTable
-                // columns={columns}
                 data={initialUsers}
                 initialMaxPagesCount={initialMaxPagesCount}
                 tableConfig={tableConfig}

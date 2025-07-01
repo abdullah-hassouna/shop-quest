@@ -18,11 +18,12 @@ import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { ConfirmUserValidationSchema } from '@/validation/auth-validation'
 import { confirmUaserDataUpdate, UserNewDataProps } from '@/actions/user/confirm-user-data-update'
-import useUserDataStore, { UserData, UserState } from '@/store/user-store'
+import useUserDataStore, { UserState } from '@/store/user-store'
 import { redirect as NextRedirect } from 'next/navigation'
+import { UserDataInterface } from '@/types/user-data-type'
 
 
-const ConfirmUserDialog = ({ children, newUserData, oldUserData, className, disabled }: { children: React.ReactNode, newUserData: UserNewDataProps, oldUserData: UserData, className?: string, disabled: boolean },) => {
+const ConfirmUserDialog = ({ children, newUserData, oldUserData, className, disabled }: { children: React.ReactNode, newUserData: UserNewDataProps, oldUserData: UserDataInterface, className?: string, disabled: boolean },) => {
 
     const { user, changeEmail, changeName, } = useUserDataStore((state: UserState) => state);
     return (
@@ -55,8 +56,8 @@ const ConfirmUserDialog = ({ children, newUserData, oldUserData, className, disa
                                 toast("submited")
                                 const { success, error, newData, redirect } = await confirmUaserDataUpdate(user.id, values.password, newUserData);
                                 if (success && newData && redirect) {
-                                    changeEmail(newData.email || user.email)
-                                    changeName(newData.fullname || user.name)
+                                    changeEmail(newData.email as string || user.email as string)
+                                    changeName(newData.fullname as string || user.name as string)
                                     toast('Confirming Success', {
                                         duration: 5000,
                                     });

@@ -5,10 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import clsx from 'clsx';
-import { UserData } from '@/store/user-store';
 import ConfirmUserDialog from '../dialogs/confirm-user';
+import { UserDataInterface } from '@/types/user-data-type';
+import { UserNewDataProps } from '@/actions/user/confirm-user-data-update';
 
-const EditUserDataForm = (initialValues: UserData) => (
+const EditUserDataForm = (initialValues: UserDataInterface) => (
     <div>
         <Formik
             initialValues={{ fullname: initialValues.name, email: initialValues.email, password: '', confirmPassword: '' }}
@@ -37,7 +38,7 @@ const EditUserDataForm = (initialValues: UserData) => (
                         name="fullname"
                         onChange={handleChange}
                         onBlur={handleBlur}
-                        value={values.fullname}
+                        value={values.fullname as string}
                         className='text-base sm:text-lg p-4 sm:p-6'
                     />
                     <small className='font-bold text-red-700'>
@@ -54,7 +55,7 @@ const EditUserDataForm = (initialValues: UserData) => (
                         name="email"
                         onChange={handleChange}
                         onBlur={handleBlur}
-                        value={values.email}
+                        value={values.email as string}
                         className='text-base sm:text-lg p-4 sm:p-6'
                     />
                     <small className='font-bold text-red-700'>
@@ -95,7 +96,7 @@ const EditUserDataForm = (initialValues: UserData) => (
                         {errors.confirmPassword && touched.confirmPassword && errors.confirmPassword}
                     </small>
                 </div>
-                <ConfirmUserDialog disabled={(errors.password || errors.confirmPassword || errors.email || errors.fullname) ? true : false} newUserData={values} oldUserData={initialValues} className='w-full bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 hover:from-purple-600 hover:via-pink-600 hover:to-red-600 text-white text-base sm:text-xl font-bold p-4 sm:p-6 rounded-md shadow-xl transition-colors duration-300 ease-in-out cursor-pointer'>
+                <ConfirmUserDialog disabled={(errors.password || errors.confirmPassword || errors.email || errors.fullname) ? true : false} newUserData={values as UserNewDataProps} oldUserData={initialValues} className='w-full bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 hover:from-purple-600 hover:via-pink-600 hover:to-red-600 text-white text-base sm:text-xl font-bold p-4 sm:p-6 rounded-md shadow-xl transition-colors duration-300 ease-in-out cursor-pointer'>
                     Save
                 </ConfirmUserDialog>
                 <Button

@@ -2,17 +2,17 @@
 
 import prisma from '@/lib/prisma';
 import { ActionReturnType } from '@/types/actions-return-type';
-import { GetAllUsersResponse } from '@/types/get-all-users-response';
+import { GetUserDataResponse } from '@/types/get-user-data-response';
 import { cache } from 'react';
 
 
-export const getAllUsers = cache(async (page: string | number, take: number = 2, search: string = "", orderBy: { order: string, sort: 'asc' | 'desc', } = { sort: "asc", order: "createdAt" },): Promise<ActionReturnType<GetAllUsersResponse[]>> => {
+export const getAllUsers = cache(async (page: string | number, take: number = 2, search: string = "", orderBy?: { order: string, sort: 'asc' | 'desc', } | null,): Promise<ActionReturnType<GetUserDataResponse[]>> => {
     const index = (Number(page) || 1) - 1;
 
     try {
         const users = await prisma?.user.findMany({
             orderBy: {
-                [orderBy.order]: orderBy.sort
+                [orderBy ? orderBy.order : "id"]: orderBy ? orderBy.sort : "asc"
             },
             where: {
                 OR: [
@@ -40,21 +40,25 @@ export const getAllUsers = cache(async (page: string | number, take: number = 2,
             },
             select: {
                 id: true,
+                image: true,
                 name: true,
                 email: true,
                 role: true,
+                emailVerified: true,
                 createdAt: true,
-                updatedAt: true
+                updatedAt: true,
+                sessions: {
+                    select: {
+                        expires: true
+                    }
+                }
             },
             skip: index * take,
             take: take
         });
 
-        console.log("Fetched users:", users);
-        console.log("Page:", page, "Take:", take, "Order By:", orderBy, "Search:", search);
-
         return {
-            data: users as GetAllUsersResponse[] | null,
+            data: users as GetUserDataResponse[] | null,
             error: null,
             success: true
         };

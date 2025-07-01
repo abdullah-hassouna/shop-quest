@@ -14,7 +14,6 @@ const layout = ({
         const getCurrentUserRole = async () => {
             try {
                 const { success, sessionExpired, userData } = await getUserSession();
-                console.log(userData)
                 if (success && !sessionExpired && userData) {
                     if (!userData!.role.startsWith('ADMIN')) {
                         return redirect('/');

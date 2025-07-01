@@ -5,11 +5,12 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import clsx from 'clsx';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import useUserDataStore, { UserData, UserState } from '@/store/user-store';
+import useUserDataStore, { UserState } from '@/store/user-store';
 import { uploadNewprofileImg } from '@/actions/cloudinary/upload-image';
+import { UserDataInterface } from '@/types/user-data-type';
 
 
-const ChangeProfileImageForm = ({ user }: { user: UserData }) => {
+const ChangeProfileImageForm = ({ user }: { user: UserDataInterface }) => {
     const { user: userData, changeImg } = useUserDataStore((state: UserState) => state);
     const [previewImg, setPreviewImg] = useState<File | undefined>()
     const [isUploading, setIsUploading] = useState(false);
@@ -42,9 +43,9 @@ const ChangeProfileImageForm = ({ user }: { user: UserData }) => {
             }) => (<form className=' flex flex-col space-y-4 sm:space-y-6' onSubmit={handleSubmit}>
                 <div className='w-full flex justify-center md:justify-start'>
                     <Avatar className='h-24 w-24 text-6xl text-purple-500'>
-                        {previewImg && <AvatarImage src={URL.createObjectURL(previewImg!)} alt={user.name} />}
+                        {previewImg && <AvatarImage src={URL.createObjectURL(previewImg!)} alt={user.name!} />}
                         <AvatarFallback className='bg-purple-500 text-gray-100'>
-                            {user.name.split(" ")[0].charAt(0).toUpperCase()}
+                            {user.name!.split(" ")[0].charAt(0).toUpperCase()}
                         </AvatarFallback>
                     </Avatar>
                 </div>
