@@ -1,7 +1,7 @@
 "use server"
 import prisma from '@/lib/prisma';
 
-export async function uploadNewprofileImg(imageFile: File, userId: string) {
+export async function uploadNewProfileImg(imageFile: File, userId: string) {
     if (!imageFile) return;
 
     const CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME;
@@ -36,3 +36,40 @@ export async function uploadNewprofileImg(imageFile: File, userId: string) {
         }
     }
 };
+export async function uploadNewProductImage(imageFiles: File[]) {
+
+
+    if (!imageFiles || imageFiles.length === 0) {
+        throw new Error('No files provided');
+    }
+
+    const formData = new FormData();
+
+    imageFiles.forEach((file) => {
+        formData.append('files', file);
+    });
+
+    try {
+        const response = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData,
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+            throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        if (!result.success) {
+            throw new Error(result.details || 'Upload failed');
+        }
+
+        return result;
+
+    } catch (error) {
+        console.error('Error uploading images:', error);
+        throw error;
+    }
+}

@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import clsx from 'clsx';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import useUserDataStore, { UserState } from '@/store/user-store';
-import { uploadNewprofileImg } from '@/actions/cloudinary/upload-image';
+import { uploadNewProfileImg } from '@/actions/cloudinary/upload-image';
 import { UserDataInterface } from '@/types/user-data-type';
 
 
@@ -22,7 +22,7 @@ const ChangeProfileImageForm = ({ user }: { user: UserDataInterface }) => {
             onSubmit={async () => {
                 if (previewImg) {
                     setIsUploading(true)
-                    const newProfileImage = await uploadNewprofileImg(previewImg, userData.id)
+                    const newProfileImage = await uploadNewProfileImg(previewImg, userData.id)
                     if (newProfileImage) {
                         changeImg(newProfileImage);
                     } else {

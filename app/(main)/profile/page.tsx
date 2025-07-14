@@ -8,7 +8,7 @@ import getUserSession from '@/actions/auth/regisreation/get-user-session';
 import { getOrders } from '@/actions/orders/get-orders';
 import type { Order, OrderItem } from "@prisma/client"
 import { redirect } from 'next/navigation';
-import useUserDataStore, { UserData, UserState } from '@/store/user-store';
+import useUserDataStore, { UserState } from '@/store/user-store';
 import EditUserDataForm from '@/components/forms/edit-user-data';
 import ChangeProfileImgDialog from '@/components/dialogs/change-profile-img';
 

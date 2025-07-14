@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import clsx from 'clsx';
-import ConfirmUserDialog from '../dialogs/confirm-user';
+import ConfirmUserDialog from '@/components/dialogs/confirm-user';
 import { UserDataInterface } from '@/types/user-data-type';
 import { UserNewDataProps } from '@/actions/user/confirm-user-data-update';
 

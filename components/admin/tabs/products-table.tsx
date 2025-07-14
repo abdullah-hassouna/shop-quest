@@ -1,8 +1,9 @@
 "use server"
 
-import { ProductsDataTable } from "@/components/admin/ProductsDataTable";
+import { ProductsDataTable } from "@/components/admin/tables/products-data-table";
 import { getAllProducts, getAllProductsPages } from "@/actions/admin/products/get-all-products";
 import { GetProductDataResponse } from "@/types/get-data-response";
+import AddNewProductDialog from "../dialogs/AddNewProduct";
 
 
 export default async function ProductsTable() {
@@ -46,7 +47,6 @@ export default async function ProductsTable() {
           {error.map(err => err)}
         </div>
       ) : <></>}
-
       <ProductsDataTable
         data={initialPorducts}
         initialMaxPagesCount={initialMaxProductsPagesCount}

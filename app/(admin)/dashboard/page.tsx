@@ -1,235 +1,276 @@
-import React from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
+    ArrowUpRight,
+    ArrowDownRight,
+    DollarSign,
     Users,
     CreditCard,
-    ShoppingCart,
-    DollarSign,
+    Activity,
     TrendingUp,
     TrendingDown,
-    Activity,
-    UserCheck,
-    Package,
-    Target,
-    BarChart3,
-    Eye
-} from 'lucide-react';
+    Eye,
+    ShoppingCart,
+} from "lucide-react"
 
 export default function Dashboard() {
-    const metrics = [
-        {
-            title: "Total Users",
-            value: "24,543",
-            change: "+12.5%",
-            changeType: "positive",
-            icon: Users,
-            description: "Active users this month"
-        },
-        {
-            title: "Monthly Revenue",
-            value: "$127,450",
-            change: "+8.3%",
-            changeType: "positive",
-            icon: DollarSign,
-            description: "Total revenue this month"
-        },
-        {
-            title: "Orders",
-            value: "3,247",
-            change: "+15.2%",
-            changeType: "positive",
-            icon: ShoppingCart,
-            description: "Orders completed this month"
-        },
-        {
-            title: "Payment Success Rate",
-            value: "98.7%",
-            change: "+0.3%",
-            changeType: "positive",
-            icon: CreditCard,
-            description: "Successful payments this month"
-        },
-        {
-            title: "New Customers",
-            value: "1,832",
-            change: "+22.1%",
-            changeType: "positive",
-            icon: UserCheck,
-            description: "First-time customers this month"
-        },
-        {
-            title: "Average Order Value",
-            value: "$89.24",
-            change: "-2.4%",
-            changeType: "negative",
-            icon: TrendingUp,
-            description: "Average per order this month"
-        },
-        {
-            title: "Products Sold",
-            value: "15,678",
-            change: "+18.7%",
-            changeType: "positive",
-            icon: Package,
-            description: "Total items sold this month"
-        },
-        {
-            title: "Conversion Rate",
-            value: "4.2%",
-            change: "+0.8%",
-            changeType: "positive",
-            icon: Target,
-            description: "Visitor to customer conversion"
-        },
-        {
-            title: "Monthly Visitors",
-            value: "89,432",
-            change: "+28.4%",
-            changeType: "positive",
-            icon: Eye,
-            description: "Unique website visitors"
-        },
-        {
-            title: "Customer Satisfaction",
-            value: "4.8/5",
-            change: "+0.1",
-            changeType: "positive",
-            icon: Activity,
-            description: "Average rating this month"
-        },
-        {
-            title: "Return Rate",
-            value: "2.1%",
-            change: "-0.5%",
-            changeType: "positive",
-            icon: TrendingDown,
-            description: "Product return rate"
-        },
-        {
-            title: "Sales Growth",
-            value: "+24.8%",
-            change: "vs last month",
-            changeType: "neutral",
-            icon: BarChart3,
-            description: "Month-over-month growth"
-        }
-    ];
-
-    const getChangeColor = (changeType: any) => {
-        switch (changeType) {
-            case 'positive': return 'text-green-600 bg-green-50';
-            case 'negative': return 'text-red-600 bg-red-50';
-            default: return 'text-blue-600 bg-blue-50';
-        }
-    };
-
-    const getIconBgColor = (changeType: any) => {
-        switch (changeType) {
-            case 'positive': return 'bg-green-100 text-green-600';
-            case 'negative': return 'bg-red-100 text-red-600';
-            default: return 'bg-blue-100 text-blue-600';
-        }
-    };
-
     return (
-        <div className="min-h-screen bg-gray-50 p-6">
-            <div className="max-w-7xl mx-auto">
-                {/* Header */}
+        <div className="min-h-screen bg-gray-50/40">
+            {/* Header */}
+            <header className="border-b bg-white">
+                <div className="flex h-16 items-center px-6">
+                    <div className="flex items-center space-x-4">
+                        <h1 className="text-2xl font-semibold">Dashboard</h1>
+                    </div>
+                    <div className="ml-auto flex items-center space-x-4">
+                        <Button variant="outline" size="sm">
+                            Export
+                        </Button>
+                        <Button size="sm">Add Widget</Button>
+                    </div>
+                </div>
+            </header>
+
+            {/* Main Content */}
+            <main className="p-6">
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                        Dashboard Overview
-                    </h1>
-                    <p className="text-gray-600">
-                        Your business metrics for {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                    </p>
+                    <h2 className="text-3xl font-bold tracking-tight">Good morning, Alex</h2>
+                    <p className="text-muted-foreground">Here's what's happening with your business today.</p>
                 </div>
 
                 {/* Metrics Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {metrics.map((metric, index) => {
-                        const IconComponent = metric.icon;
-
-                        return (
-                            <div
-                                key={index}
-                                className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200"
-                            >
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className={`p-2 rounded-lg ${getIconBgColor(metric.changeType)}`}>
-                                        <IconComponent className="w-5 h-5" />
-                                    </div>
-                                    <div className={`px-2 py-1 rounded-full text-xs font-medium ${getChangeColor(metric.changeType)}`}>
-                                        {metric.change}
-                                    </div>
-                                </div>
-
-                                <div className="mb-2">
-                                    <h3 className="text-sm font-medium text-gray-500 mb-1">
-                                        {metric.title}
-                                    </h3>
-                                    <p className="text-2xl font-bold text-gray-900">
-                                        {metric.value}
-                                    </p>
-                                </div>
-
-                                <p className="text-xs text-gray-400">
-                                    {metric.description}
-                                </p>
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+                    {/* Total Revenue */}
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+                            <DollarSign className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">$45,231.89</div>
+                            <div className="flex items-center text-xs text-muted-foreground">
+                                <ArrowUpRight className="mr-1 h-3 w-3 text-green-500" />
+                                <span className="text-green-500">+20.1%</span>
+                                <span className="ml-1">from last month</span>
                             </div>
-                        );
-                    })}
+                        </CardContent>
+                    </Card>
+
+                    {/* Subscriptions */}
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Subscriptions</CardTitle>
+                            <Users className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">+2,350</div>
+                            <div className="flex items-center text-xs text-muted-foreground">
+                                <ArrowUpRight className="mr-1 h-3 w-3 text-green-500" />
+                                <span className="text-green-500">+180.1%</span>
+                                <span className="ml-1">from last month</span>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Sales */}
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Sales</CardTitle>
+                            <CreditCard className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">+12,234</div>
+                            <div className="flex items-center text-xs text-muted-foreground">
+                                <ArrowUpRight className="mr-1 h-3 w-3 text-green-500" />
+                                <span className="text-green-500">+19%</span>
+                                <span className="ml-1">from last month</span>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Active Now */}
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Active Now</CardTitle>
+                            <Activity className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">+573</div>
+                            <div className="flex items-center text-xs text-muted-foreground">
+                                <ArrowUpRight className="mr-1 h-3 w-3 text-green-500" />
+                                <span className="text-green-500">+201</span>
+                                <span className="ml-1">since last hour</span>
+                            </div>
+                        </CardContent>
+                    </Card>
                 </div>
 
-                {/* Summary Cards */}
-                <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                            Quick Stats
-                        </h3>
-                        <div className="space-y-3">
-                            <div className="flex justify-between items-center">
-                                <span className="text-gray-600">Today's Revenue</span>
-                                <span className="font-medium text-gray-900">$4,287</span>
+                {/* Secondary Metrics */}
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
+                    {/* Monthly Growth */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="text-base">Monthly Growth</CardTitle>
+                            <CardDescription>Revenue growth over time</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <div className="text-2xl font-bold text-green-600">+24.5%</div>
+                                    <p className="text-xs text-muted-foreground">vs last month</p>
+                                </div>
+                                <div className="flex items-center">
+                                    <TrendingUp className="h-8 w-8 text-green-500" />
+                                </div>
                             </div>
-                            <div className="flex justify-between items-center">
-                                <span className="text-gray-600">Yesterday's Orders</span>
-                                <span className="font-medium text-gray-900">127</span>
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <span className="text-gray-600">Active Sessions</span>
-                                <span className="font-medium text-gray-900">1,432</span>
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <span className="text-gray-600">Pending Orders</span>
-                                <span className="font-medium text-gray-900">23</span>
-                            </div>
-                        </div>
-                    </div>
+                        </CardContent>
+                    </Card>
 
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                            Performance Summary
-                        </h3>
-                        <div className="space-y-3">
-                            <div className="flex justify-between items-center">
-                                <span className="text-gray-600">Sales Target Progress</span>
-                                <span className="font-medium text-green-600">84.2%</span>
+                    {/* Conversion Rate */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="text-base">Conversion Rate</CardTitle>
+                            <CardDescription>Visitors to customers</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <div className="text-2xl font-bold">3.24%</div>
+                                    <div className="flex items-center text-xs text-muted-foreground">
+                                        <ArrowDownRight className="mr-1 h-3 w-3 text-red-500" />
+                                        <span className="text-red-500">-0.4%</span>
+                                    </div>
+                                </div>
+                                <div className="flex items-center">
+                                    <TrendingDown className="h-8 w-8 text-red-500" />
+                                </div>
                             </div>
-                            <div className="flex justify-between items-center">
-                                <span className="text-gray-600">Best Selling Product</span>
-                                <span className="font-medium text-gray-900">Premium Plan</span>
+                        </CardContent>
+                    </Card>
+
+                    {/* Page Views */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="text-base">Page Views</CardTitle>
+                            <CardDescription>Total page views today</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <div className="text-2xl font-bold">89,432</div>
+                                    <div className="flex items-center text-xs text-muted-foreground">
+                                        <ArrowUpRight className="mr-1 h-3 w-3 text-green-500" />
+                                        <span className="text-green-500">+12.3%</span>
+                                    </div>
+                                </div>
+                                <div className="flex items-center">
+                                    <Eye className="h-8 w-8 text-blue-500" />
+                                </div>
                             </div>
-                            <div className="flex justify-between items-center">
-                                <span className="text-gray-600">Top Traffic Source</span>
-                                <span className="font-medium text-gray-900">Organic Search</span>
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <span className="text-gray-600">Customer Retention</span>
-                                <span className="font-medium text-blue-600">78.3%</span>
-                            </div>
-                        </div>
-                    </div>
+                        </CardContent>
+                    </Card>
                 </div>
-            </div>
+
+                {/* Detailed Cards */}
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
+                    {/* Recent Orders */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Recent Orders</CardTitle>
+                            <CardDescription>Latest customer orders</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center space-x-3">
+                                        <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+                                            <ShoppingCart className="h-4 w-4 text-blue-600" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-medium">Order #3210</p>
+                                            <p className="text-xs text-muted-foreground">2 minutes ago</p>
+                                        </div>
+                                    </div>
+                                    <Badge variant="secondary">$299.00</Badge>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center space-x-3">
+                                        <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
+                                            <ShoppingCart className="h-4 w-4 text-green-600" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-medium">Order #3209</p>
+                                            <p className="text-xs text-muted-foreground">5 minutes ago</p>
+                                        </div>
+                                    </div>
+                                    <Badge variant="secondary">$149.00</Badge>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center space-x-3">
+                                        <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center">
+                                            <ShoppingCart className="h-4 w-4 text-purple-600" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-medium">Order #3208</p>
+                                            <p className="text-xs text-muted-foreground">12 minutes ago</p>
+                                        </div>
+                                    </div>
+                                    <Badge variant="secondary">$79.00</Badge>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Top Products */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Top Products</CardTitle>
+                            <CardDescription>Best selling products this month</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm font-medium">Wireless Headphones</p>
+                                        <p className="text-xs text-muted-foreground">1,234 sold</p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-sm font-medium">$89,432</p>
+                                        <Badge variant="outline" className="text-green-600">
+                                            +15%
+                                        </Badge>
+                                    </div>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm font-medium">Smart Watch</p>
+                                        <p className="text-xs text-muted-foreground">856 sold</p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-sm font-medium">$67,890</p>
+                                        <Badge variant="outline" className="text-green-600">
+                                            +8%
+                                        </Badge>
+                                    </div>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm font-medium">Laptop Stand</p>
+                                        <p className="text-xs text-muted-foreground">432 sold</p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-sm font-medium">$23,456</p>
+                                        <Badge variant="outline" className="text-red-600">
+                                            -3%
+                                        </Badge>
+                                    </div>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+            </main>
         </div>
-    );
+    )
 }

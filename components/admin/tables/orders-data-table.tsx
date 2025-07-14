@@ -1,38 +1,26 @@
 "use client";
 
-import { useState, useEffect, useCallback, MouseEvent } from 'react';
-import { getAllUsers, getAllUsersPages } from "@/actions/admin/users/get-all-users";
-import { GetUserDataResponse } from "@/types/get-data-response"
+import { useState, useEffect, useCallback } from 'react';
+import { GetOrderDataAdminResponse, } from "@/types/get-data-response"
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Badge, } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { Table, TableBody, TableHeader, TableRow } from '@/components/ui/table';
-import { ArrowDown, ArrowLeft, BlocksIcon, DeleteIcon, Edit2Icon, MoreVertical, RemoveFormattingIcon, ShieldCheck, Ungroup, X } from 'lucide-react';
+import { Table, TableBody, TableHeader } from '@/components/ui/table';
+import { ArrowDown, ArrowLeft, CirclePlus, } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import UserActionDialog from '@/components/dialogs/user-actions';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
+import AddNewProductDialog from '../dialogs/AddNewProduct';
+import Link from 'next/link';
+import { EnhancedDataTableProps, OrderBy } from '@/types/general';
+import { getAllOrders, getAllOrdersPages } from '@/actions/admin/order/get-all-orders-data';
+import { OrderStatus } from '@prisma/client';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 
-interface EnhancedDataTableProps {
-    data: GetUserDataResponse[];
-    initialMaxPagesCount: number;
-    tableConfig: {
-        defaultPageSize: number;
-        availablePageSizes: number[];
-    };
-}
-
-interface OrderBy {
-    order: string,
-    sort: 'asc' | 'desc'
-}
-
-export function UsersDataTable({
-    data: initialData,
+export function OrdersDataTable({
+    data,
     initialMaxPagesCount,
     tableConfig
-}: EnhancedDataTableProps) {
-    const [users, setUsers] = useState<GetUserDataResponse[]>(initialData);
+}: EnhancedDataTableProps<GetOrderDataAdminResponse>) {
+    const [usersOrders, setUsersOrders] = useState<GetOrderDataAdminResponse[]>(data);
     const [page, setPage] = useState<number>(1);
     const [maxPagesCount, setMaxPagesCount] = useState<number>(initialMaxPagesCount);
     const [pageTakeNum, setPagesTakeNum] = useState<number>(tableConfig.defaultPageSize);
@@ -55,85 +43,88 @@ export function UsersDataTable({
 
     const columns = [
         {
-            title: "Name",
-            accessorKey: 'name',
+            title: "ID",
+            accessorKey: 'id',
             header: HeaderCell,
-            cell: ({ row }: { row: any }) => row.getValue('name'),
+            cell: ({ row }: { row: any }) => row.getValue('id'),
         },
         {
-            title: "Email",
-            accessorKey: 'email',
+            title: "Buyer",
+            accessorKey: 'buyer',
             header: HeaderCell,
-            cell: ({ row }: { row: any }) => <HoverCard>
-                <HoverCardTrigger><div className='flex items-center gap-2'>
-                    {row.getValue('emailVerified') && <ShieldCheck className='w-4 h-4' />}
-                    <span>
-                        {row.getValue('email')}
-                    </span>
-                </div></HoverCardTrigger>
-                <HoverCardContent>
-                    {row.getValue('emailVerified') ? <span>User Email is <span className='text-green-500 font-bold'>Verfied</span></span> : <span>User Email is <span className='font-bold text-red-500'>NOT Verified</span></span>}
-                </HoverCardContent>
+            cell: ({ row }: { row: any }) => <Link href={`./users/${row.getValue('buyer').id}`} className='capitalize'>{row.getValue('buyer').name}</Link>,
+        },
+        {
+            title: "Total",
+            accessorKey: 'total',
+            header: HeaderCell,
+            cell: ({ row }: { row: any }) => row.getValue('total'),
+        },
+        {
+            title: "Status",
+            accessorKey: 'status',
+            header: HeaderCell,
+            cell: ({ row }: { row: any }) => {
+                const status = row.getValue("status")
 
-            </HoverCard>,
+                const statusVariant = {
+                    "CANCELLED": "destructive",
+                    "DELIVERED": "delivered",
+                    "PENDING": "pending",
+                    "SHIPPED": "success"
+                }[status as OrderStatus] as "destructive" | "success" | "pending" | "delivered"
+
+                return <Select defaultValue={status.toLowerCase()}>
+                    <SelectTrigger>
+                        <Badge className='capitalize' variant={statusVariant}>
+                            {status.toLowerCase()}
+                        </Badge>
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem
+                            className='capitalize'
+                            value={'cancelled'}>cancelled</SelectItem>
+                        <SelectItem
+                            className='capitalize'
+                            value={'delivered'}>delivered</SelectItem>
+                        <SelectItem
+                            className='capitalize'
+                            value={'pending'}>pending</SelectItem>
+                        <SelectItem
+                            className='capitalize'
+                            value={'shipped'}>shipped</SelectItem>
+                    </SelectContent>
+                </Select>
+            },
         },
         {
-            title: "Role",
-            accessorKey: 'role',
+            title: "Items",
+            accessorKey: 'items',
+            header: () => <span className="mr-2">Items</span>,
+            cell: ({ row }: { row: any }) =>
+                <div>
+                    {row.getValue('items').map(({ product: prd }: any, i: number) => <span key={i}>{prd.name}</span>)}</div>
+            ,
+        },
+        {
+            title: "Quantity",
+            accessorKey: 'quantity',
             header: HeaderCell,
-            cell: ({ row }: { row: any }) => <Badge className={cn("capitalize", { "bg-blue-500": (row.getValue('role') === "ADMIN") })}>{row.getValue('role').toLowerCase()}</Badge>,
+            cell: ({ row }: { row: any }) =>
+                <div>{row.getValue('items').reduce((p1: any, p2: any) => (Number(p1.quantity) + Number(p2.quantity)), 0)}</div>,
         },
         {
-            title: "Created at",
+            title: "Created At",
             accessorKey: 'createdAt',
             header: HeaderCell,
-            cell: ({ row }: { row: any }) => new Date(row.getValue('createdAt')).toLocaleDateString(),
-        },
-        {
-            title: "Updated at",
-            accessorKey: 'updatedAt',
-            header: HeaderCell,
-            cell: ({ row }: { row: any }) => new Date(row.getValue('updatedAt')).toLocaleDateString(),
-        },
-        {
-            title: "Actions",
-            accessorKey: 'actions',
-            header: () => <>Actions</>,
-            cell: ({ row }: { row: any }) => (
-                <Popover>
-                    <PopoverTrigger><MoreVertical /></PopoverTrigger>
-                    <PopoverContent className='max-w-40 p-0'>
-                        <div className='px-1 py-2 justify-between items-start flex flex-col gap-2'>
-                            <UserActionDialog user={{
-                                id: row.getValue("id"),
-                                name: row.getValue("name"),
-                                image: row.getValue("image"),
-                                email: row.getValue("email"),
-                                emailVerified: row.getValue("emailVerified"),
-                                role: row.getValue("role").toLowerCase(),
-                                sessions: row.getValue("sessions"),
-                                createdAt: row.getValue("createdAt"),
-                                updatedAt: row.getValue("updatedAt")
-                            }} className='w-full' >
-                                <Button variant={"ghost"} className='flex justify-start items-center gap-2 w-full px-1.5 group hover:bg-blue-900 rounded-md'>
-                                    <Edit2Icon className='group-hover:font-bold group-hover:text-white text-blue-800 w-4 h-4' /> <span className='group-hover:font-bold group-hover:text-white text-blue-800'>Edit</span>
-                                </Button>
-                            </UserActionDialog>
-                            <Button variant={"ghost"} className='flex justify-start items-center gap-2 w-full px-1.5 group hover:bg-black rounded-md'>
-                                <Ungroup className='group-hover:font-bold group-hover:text-white text-gray-800 w-4 h-4' /> <span className='group-hover:font-bold group-hover:text-white text-gray-800'>Ban</span>
-                            </Button>
-                            <Button variant={"ghost"} className='flex justify-start items-center gap-2 w-full px-1.5 group hover:bg-red-600 rounded-md'>
-                                <X className='group-hover:font-bold group-hover:text-white text-red-600 w-4 h-4' /> <span className='group-hover:font-bold group-hover:text-white text-red-600'>Delete</span>
-                            </Button>
-                        </div>
-                    </PopoverContent>
-                </Popover>
-            ),
+            cell: ({ row }: { row: any }) => row.getValue('createdAt').toLocaleDateString(),
         },
     ];
 
+
     const NextPage = () => {
         console.log(page)
+        console.log(initialMaxPagesCount)
         if ((page < initialMaxPagesCount)) {
             setPage(page + 1)
         }
@@ -151,17 +142,17 @@ export function UsersDataTable({
         setError(null);
 
         try {
-            const { data, error, success } = await getAllUsers(
+            const { data, error, success } = await getAllOrders(
                 pageNum,
                 take,
                 searchQuery,
                 orderByObj
             );
             if (success && data) {
-                setUsers(data);
+                setUsersOrders(data);
             } else if (error) {
-                setError(`Error fetching users: ${error}`);
-                console.error("Error fetching users:", error);
+                setError(`Error fetching usersOrders: ${error}`);
+                console.error("Error fetching usersOrders:", error);
             }
         } catch (err) {
             setError('Unexpected error occurred');
@@ -173,7 +164,7 @@ export function UsersDataTable({
 
     const callPagesNumber = useCallback(async (take: number = 5, searchQuery: string = "") => {
         try {
-            const { data, error, success } = await getAllUsersPages(take, searchQuery);
+            const { data, error, success } = await getAllOrdersPages(take, searchQuery);
             if (success && data) {
                 setMaxPagesCount(data);
             } else if (error) {
@@ -185,12 +176,10 @@ export function UsersDataTable({
     }, []);
 
     useEffect(() => {
-        console.log("use Effect called:", 1);
         callAllUsers(page, pageTakeNum, search, orderBy);
     }, [page, pageTakeNum, callAllUsers, tableConfig.defaultPageSize, orderBy]);
 
     useEffect(() => {
-        console.log("use Effect called:", 2);
         const timeoutId = setTimeout(() => {
             callAllUsers(page, pageTakeNum, search, orderBy);
             callPagesNumber(pageTakeNum, search);
@@ -200,7 +189,6 @@ export function UsersDataTable({
     }, [search]);
 
     useEffect(() => {
-        console.log("use Effect called:", 3);
         if (pageTakeNum === tableConfig.defaultPageSize) {
             return;
         }
@@ -220,7 +208,7 @@ export function UsersDataTable({
 
     return (
         <div className="space-y-4">
-            {(loading && !(users.length)) ? (
+            {(loading && !(usersOrders.length)) ? (
                 <div className="flex justify-center items-center p-4">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
                     <span className="ml-2">Loading...</span>
@@ -233,6 +221,9 @@ export function UsersDataTable({
                 </div>
             )}
 
+            <div className='flex justify-between items-center'>
+                <span className='text-2xl font-bold'>Users Orders</span>
+            </div>
             <div className='flex gap-2'>
                 <Input placeholder='Search' value={search} onChange={(e) => setSearch((e.target.value).trim())} />
                 {
@@ -246,20 +237,20 @@ export function UsersDataTable({
             <div className="border rounded-lg overflow-hidden">
                 <Table className="w-full">
                     <TableHeader className="bg-gray-50">
-                        <TableRow>
+                        <tr>
                             {columns.map((column, index) => <th className="px-4 py-2 text-left text-sm font-medium text-gray-900" key={index} >
                                 <column.header title={column.title} column={column.accessorKey} /></th>)}
-                        </TableRow>
+                        </tr>
                     </TableHeader>
                     <TableBody className="divide-y divide-gray-200">
-                        {users.map((user, rowIndex) => (
-                            <TableRow onClick={(e) => toggleToSelected(e, user.id as string)} key={user.id || rowIndex} className={cn("hover:bg-gray-50", { "bg-gray-100": selectedList.find((OldId) => OldId == user.id) })}>
+                        {usersOrders.map((userOrder, rowIndex) => (
+                            <tr onClick={(e) => toggleToSelected(e, userOrder.id as string)} key={userOrder.id || rowIndex} className={cn("hover:bg-gray-50", { "bg-gray-100": selectedList.find((OldId) => OldId == userOrder.id) })}>
                                 {columns.map((column, colIndex) => (
                                     <td key={colIndex} className="cursor-pointer px-4 py-2 text-sm text-gray-900">
-                                        {column.cell ? column.cell({ row: { getValue: (key: string) => user[key as keyof GetUserDataResponse] } }) : user[column.accessorKey as keyof GetUserDataResponse]}
+                                        {column.cell ? column.cell({ row: { getValue: (key: string) => userOrder[key as keyof GetOrderDataAdminResponse] } }) : userOrder[column.accessorKey as keyof GetOrderDataAdminResponse]}
                                     </td>
                                 ))}
-                            </TableRow>
+                            </tr>
                         ))}
                     </TableBody>
                 </Table>

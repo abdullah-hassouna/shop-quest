@@ -1,6 +1,5 @@
-// import type { NextConfig } from "next";
-
-const nextConfig = {
+import type { NextConfig } from "next";
+const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
   generateEtags: false,
@@ -10,11 +9,8 @@ const nextConfig = {
   },
   experimental: {
     optimizeCss: true,
-    optimizeImages: true,
-    isrMemoryCacheSize: 0,
   },
   trailingSlash: false,
-  swcMinify: true,
 
   async headers() {
     return [
@@ -29,7 +25,7 @@ const nextConfig = {
       },
     ]
   },
-  
+
   webpack: (config: any, { isServer }: { isServer: any }) => {
     if (!isServer) {
       config.resolve.fallback = {

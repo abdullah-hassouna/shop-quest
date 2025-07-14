@@ -2,7 +2,7 @@
 
 import { GetUserDataResponse } from "@/types/get-data-response";
 import { getAllUsers, getAllUsersPages } from "@/actions/admin/users/get-all-users";
-import { UsersDataTable } from "../UsersDataTable";
+import { UsersDataTable } from "../tables/users-data-table";
 
 
 export default async function UsersTable() {

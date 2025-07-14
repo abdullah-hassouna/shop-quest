@@ -1,35 +1,27 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { getAllProducts, getAllProductsPages } from "@/actions/admin/products/get-all-products";
-import { GetProductDataResponse } from "@/types/get-data-response"
+import { useState, useEffect, useCallback, MouseEvent } from 'react';
+import { getAllUsers, getAllUsersPages } from "@/actions/admin/users/get-all-users";
+import type { GetOneUserDataAdminResponse } from "@/types/get-data-response"
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { Table, TableBody, TableHeader } from '@/components/ui/table';
-import { ArrowDown, ArrowLeft, MoreVertical, ShieldCheck } from 'lucide-react';
+import { Table, TableBody, TableHeader, TableRow } from '@/components/ui/table';
+import { ArrowDown, ArrowLeft, BlocksIcon, DeleteIcon, Edit2Icon, Eye, MoreVertical, RemoveFormattingIcon, ShieldCheck, Ungroup, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import UserActionDialog from '@/components/dialogs/user-actions';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
+import Link from 'next/link';
+import { EnhancedDataTableProps, OrderBy } from '@/types/general';
+import { HeaderCell } from './HeaderTable';
 
-interface EnhancedDataTableProps {
-    data: GetProductDataResponse[];
-    initialMaxPagesCount: number;
-    tableConfig: {
-        defaultPageSize: number;
-        availablePageSizes: number[];
-    };
-}
-
-interface OrderBy {
-    order: string,
-    sort: 'asc' | 'desc'
-}
-
-export function ProductsDataTable({
-    data: initialData,
+export function UsersDataTable({
+    data,
     initialMaxPagesCount,
     tableConfig
-}: EnhancedDataTableProps) {
-    const [products, setProducts] = useState<GetProductDataResponse[]>(initialData);
+}: EnhancedDataTableProps<GetOneUserDataAdminResponse>) {
+    const [users, setUsers] = useState<GetOneUserDataAdminResponse[]>(data);
     const [page, setPage] = useState<number>(1);
     const [maxPagesCount, setMaxPagesCount] = useState<number>(initialMaxPagesCount);
     const [pageTakeNum, setPagesTakeNum] = useState<number>(tableConfig.defaultPageSize);
@@ -40,16 +32,6 @@ export function ProductsDataTable({
     const [selectedList, setSelectedList] = useState<string[]>([]);
 
 
-    const changeOrderBy = (column: string) => {
-        setOrderBy(orderBy?.sort == "desc" ? null : { order: column, sort: orderBy?.sort === "asc" ? "desc" : "asc" })
-    }
-
-    const HeaderCell = ({ title, column }: { title: string, column: string }) => <Button onClick={() => changeOrderBy(column)} className='space-x-2' variant={"ghost"}>
-        <span className="mr-2">{title}</span>
-        {orderBy?.order === column && <ArrowDown className={cn("h-4 w-4", { "rotate-180": orderBy?.order === column && orderBy?.sort === "desc" })} />}
-    </Button>
-
-
     const columns = [
         {
             title: "Name",
@@ -58,56 +40,86 @@ export function ProductsDataTable({
             cell: ({ row }: { row: any }) => row.getValue('name'),
         },
         {
-            title: "Price",
-            accessorKey: 'price',
+            title: "Email",
+            accessorKey: 'email',
             header: HeaderCell,
-            cell: ({ row }: { row: any }) => `$${row.getValue('price')}`,
+            cell: ({ row }: { row: any }) => <HoverCard>
+                <HoverCardTrigger><div className='flex items-center gap-2'>
+                    {row.getValue('emailVerified') && <ShieldCheck className='w-4 h-4' />}
+                    <span>
+                        {row.getValue('email')}
+                    </span>
+                </div></HoverCardTrigger>
+                <HoverCardContent>
+                    {row.getValue('emailVerified') ? <span>User Email is <span className='text-green-500 font-bold'>Verfied</span></span> : <span>User Email is <span className='font-bold text-red-500'>NOT Verified</span></span>}
+                </HoverCardContent>
+
+            </HoverCard>,
         },
         {
-            title: "Description",
-            accessorKey: 'description',
+            title: "Role",
+            accessorKey: 'role',
             header: HeaderCell,
-            cell: ({ row }: { row: any }) => row.getValue('description'),
+            cell: ({ row }: { row: any }) => <Badge className={cn("capitalize", { "bg-blue-500": (row.getValue('role') === "ADMIN") })}>{row.getValue('role').toLowerCase()}</Badge>,
         },
         {
-            title: "Images",
-            accessorKey: 'imagesId',
-            header: () => <span className="mr-2">Images</span>,
-            cell: ({ row }: { row: any }) => row.getValue('imagesId')[0].url,
-        },
-        {
-            title: "Added By",
-            accessorKey: 'seller',
-            header: HeaderCell,
-            cell: ({ row }: { row: any }) => row.getValue('seller').name,
-        },
-        {
-            title: "Category",
-            accessorKey: 'category',
-            header: HeaderCell,
-            cell: ({ row }: { row: any }) => <Badge className='flex justify-between items-center' style={{ background: row.getValue('category').color }}>
-                {row.getValue('category').name}
-                {row.getValue('category').icon ? <img src={row.getValue('category').icon} className='w-3 h-3' /> : <></>}
-            </Badge>,
-        },
-        {
-            title: "Tags",
-            accessorKey: 'tags',
-            header: () => <span className="mr-2">Tags</span>,
-            cell: ({ row }: { row: any }) => row.getValue('tags')[0].name,
-        },
-        {
-            title: "Added At",
+            title: "Created at",
             accessorKey: 'createdAt',
             header: HeaderCell,
-            cell: ({ row }: { row: any }) => row.getValue('createdAt').toLocaleDateString(),
+            cell: ({ row }: { row: any }) => new Date(row.getValue('createdAt')).toLocaleDateString(),
+        },
+        {
+            title: "Updated at",
+            accessorKey: 'updatedAt',
+            header: HeaderCell,
+            cell: ({ row }: { row: any }) => new Date(row.getValue('updatedAt')).toLocaleDateString(),
+        },
+        {
+            title: "Actions",
+            accessorKey: 'actions',
+            header: () => <>Actions</>,
+            cell: ({ row }: { row: any }) => (
+                <div className='border border-black w-fit rounded-md flex px-1.5 items-center justify-evenly'>
+                    <Link href={`users/${row.getValue("id")}`} className='transition-all hover:bg-black hover:text-white rounded-md p-1'>
+                        <Eye className='w-5 h-5' />
+                    </Link>
+                    <span className='px-0.5 text-xl pb-1.5'>|</span>
+                    <Popover>
+                        <PopoverTrigger className='transition-all hover:bg-black hover:text-white rounded-md p-1' ><MoreVertical className='w-5 h-5' /></PopoverTrigger>
+                        <PopoverContent className='max-w-40 p-0'>
+                            <div className='px-1 py-2 justify-between items-start flex flex-col gap-2'>
+                                <UserActionDialog user={{
+                                    id: row.getValue("id"),
+                                    name: row.getValue("name"),
+                                    image: row.getValue("image"),
+                                    email: row.getValue("email"),
+                                    emailVerified: row.getValue("emailVerified"),
+                                    role: row.getValue("role").toLowerCase(),
+                                    sessions: row.getValue("sessions"),
+                                    createdAt: row.getValue("createdAt"),
+                                    updatedAt: row.getValue("updatedAt")
+                                }} className='w-full' >
+                                    <Button variant={"ghost"} className='flex justify-start items-center gap-2 w-full px-1.5 group hover:bg-blue-900 rounded-md'>
+                                        <Edit2Icon className='group-hover:font-bold group-hover:text-white text-blue-800 w-4 h-4' /> <span className='group-hover:font-bold group-hover:text-white text-blue-800'>Edit</span>
+                                    </Button>
+                                </UserActionDialog>
+                                <Button variant={"ghost"} className='flex justify-start items-center gap-2 w-full px-1.5 group hover:bg-black rounded-md'>
+                                    <Ungroup className='group-hover:font-bold group-hover:text-white text-gray-800 w-4 h-4' /> <span className='group-hover:font-bold group-hover:text-white text-gray-800'>Ban</span>
+                                </Button>
+                                <Button variant={"ghost"} className='flex justify-start items-center gap-2 w-full px-1.5 group hover:bg-red-600 rounded-md'>
+                                    <X className='group-hover:font-bold group-hover:text-white text-red-600 w-4 h-4' /> <span className='group-hover:font-bold group-hover:text-white text-red-600'>Delete</span>
+                                </Button>
+                            </div>
+                        </PopoverContent>
+                    </Popover>
+                </div>
+
+            ),
         },
     ];
 
-
     const NextPage = () => {
         console.log(page)
-        console.log(initialMaxPagesCount)
         if ((page < initialMaxPagesCount)) {
             setPage(page + 1)
         }
@@ -125,17 +137,17 @@ export function ProductsDataTable({
         setError(null);
 
         try {
-            const { data, error, success } = await getAllProducts(
+            const { data, error, success } = await getAllUsers(
                 pageNum,
                 take,
                 searchQuery,
                 orderByObj
             );
             if (success && data) {
-                setProducts(data);
+                setUsers(data);
             } else if (error) {
-                setError(`Error fetching products: ${error}`);
-                console.error("Error fetching products:", error);
+                setError(`Error fetching users: ${error}`);
+                console.error("Error fetching users:", error);
             }
         } catch (err) {
             setError('Unexpected error occurred');
@@ -147,7 +159,7 @@ export function ProductsDataTable({
 
     const callPagesNumber = useCallback(async (take: number = 5, searchQuery: string = "") => {
         try {
-            const { data, error, success } = await getAllProductsPages(take, searchQuery);
+            const { data, error, success } = await getAllUsersPages(take, searchQuery);
             if (success && data) {
                 setMaxPagesCount(data);
             } else if (error) {
@@ -194,7 +206,7 @@ export function ProductsDataTable({
 
     return (
         <div className="space-y-4">
-            {(loading && !(products.length)) ? (
+            {(loading && !(users.length)) ? (
                 <div className="flex justify-center items-center p-4">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
                     <span className="ml-2">Loading...</span>
@@ -220,20 +232,20 @@ export function ProductsDataTable({
             <div className="border rounded-lg overflow-hidden">
                 <Table className="w-full">
                     <TableHeader className="bg-gray-50">
-                        <tr>
+                        <TableRow>
                             {columns.map((column, index) => <th className="px-4 py-2 text-left text-sm font-medium text-gray-900" key={index} >
-                                <column.header title={column.title} column={column.accessorKey} /></th>)}
-                        </tr>
+                                <column.header orderBy={orderBy} setOrderBy={setOrderBy} title={column.title} column={column.accessorKey} /></th>)}
+                        </TableRow>
                     </TableHeader>
                     <TableBody className="divide-y divide-gray-200">
-                        {products.map((user, rowIndex) => (
-                            <tr onClick={(e) => toggleToSelected(e, user.id as string)} key={user.id || rowIndex} className={cn("hover:bg-gray-50", { "bg-gray-100": selectedList.find((OldId) => OldId == user.id) })}>
+                        {users.map((user, rowIndex) => (
+                            <TableRow onClick={(e) => toggleToSelected(e, user.id as string)} key={user.id || rowIndex} className={cn("hover:bg-gray-50", { "bg-gray-100": selectedList.find((OldId) => OldId == user.id) })}>
                                 {columns.map((column, colIndex) => (
                                     <td key={colIndex} className="cursor-pointer px-4 py-2 text-sm text-gray-900">
-                                        {column.cell ? column.cell({ row: { getValue: (key: string) => user[key as keyof GetProductDataResponse] } }) : user[column.accessorKey as keyof GetProductDataResponse]}
+                                        {column.cell ? column.cell({ row: { getValue: (key: string) => user[key as keyof GetOneUserDataAdminResponse] } }) : user[column.accessorKey as keyof GetOneUserDataAdminResponse]}
                                     </td>
                                 ))}
-                            </tr>
+                            </TableRow>
                         ))}
                     </TableBody>
                 </Table>
