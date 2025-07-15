@@ -122,7 +122,7 @@ export function ProductsDataTable({
         }
     }
 
-    const callAllUsers = useCallback(async (pageNum: number, take: number = 5, searchQuery: string = "", orderByObj: OrderBy | null) => {
+    const recallAllData = useCallback(async (pageNum: number, take: number = 5, searchQuery: string = "", orderByObj: OrderBy | null) => {
         setLoading(true);
         setError(null);
 
@@ -162,13 +162,13 @@ export function ProductsDataTable({
 
     useEffect(() => {
         console.log("use Effect called:", 1);
-        callAllUsers(page, pageTakeNum, search, orderBy);
-    }, [page, pageTakeNum, callAllUsers, tableConfig.defaultPageSize, orderBy]);
+        recallAllData(page, pageTakeNum, search, orderBy);
+    }, [page, pageTakeNum, recallAllData, tableConfig.defaultPageSize, orderBy]);
 
     useEffect(() => {
         console.log("use Effect called:", 2);
         const timeoutId = setTimeout(() => {
-            callAllUsers(page, pageTakeNum, search, orderBy);
+            recallAllData(page, pageTakeNum, search, orderBy);
             callPagesNumber(pageTakeNum, search);
         }, 1000);
 

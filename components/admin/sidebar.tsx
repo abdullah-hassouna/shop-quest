@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import {
+    BoxIcon,
     Home,
     LineChart,
     Package,
@@ -40,11 +41,17 @@ const navigationItems = [
         pathname: "orders"
     },
     {
+        href: "/dashboard/categories",
+        label: "Categories",
+        icon: BoxIcon,
+        pathname: "categories"
+    },
+    {
         href: "/dashboard/analytics",
         label: "Analytics",
         icon: LineChart,
         pathname: "analytics"
-    }
+    },
 ];
 
 export const NavigationContent = () => {
@@ -53,23 +60,22 @@ export const NavigationContent = () => {
     const isActive = (path: string) => pathName === path
 
     return (
-        <nav className="flex h-full w-full flex-col items-start px-2 text-sm font-medium lg:px-4 space-y-1">
+        <nav className="flex h-full w-full flex-col items-start px-2 text-sm font-medium lg:px-4 space-y-2">
             {navigationItems.map((item) => {
                 const IconComponent = item.icon;
                 return (
                     <Link
                         key={item.pathname}
                         href={item.href}
-                        // onClick={() => setIsMobileMenuOpen(false)}
                         className={cn(
-                            "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary",
+                            "flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary",
                             isActive(item.pathname)
                                 ? "bg-muted text-primary shadow-sm"
                                 : "text-muted-foreground hover:bg-muted/50"
                         )}
                     >
-                        <IconComponent className="h-5 w-5" />
                         {item.label}
+                        <IconComponent className="h-5 w-5" />
                     </Link>
                 );
             })}

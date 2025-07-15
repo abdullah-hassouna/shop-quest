@@ -5,6 +5,16 @@ export interface GetAvgOrderSalesDataResponse {
     number: number,
 }
 
+export interface GetCategoryDataAdminResponse {
+    id: string | null;
+    name: string | null;
+    icon: string | null;
+    slug: string | null;
+    color: string | null;
+    createdAt: Date;
+
+}
+
 export interface GetOrderDataAdminResponse {
     id: string | null;
     total: number;

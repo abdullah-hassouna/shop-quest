@@ -1,26 +1,22 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
-import { GetOrderDataAdminResponse, } from "@/types/get-data-response"
+import { GetCategoryDataAdminResponse, } from "@/types/get-data-response"
 import { Button } from '@/components/ui/button';
-import { Badge, } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Table, TableBody, TableHeader } from '@/components/ui/table';
-import { ArrowDown, ArrowLeft, CirclePlus, } from 'lucide-react';
+import { ArrowDown, ArrowLeft, } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import AddNewProductDialog from '../dialogs/AddNewProduct';
-import Link from 'next/link';
 import { EnhancedDataTableProps, OrderBy } from '@/types/general';
 import { getAllOrders, getAllOrdersPages } from '@/actions/admin/order/get-all-orders-data';
-import { OrderStatus } from '@prisma/client';
-import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
+import { getAllCategories } from '@/actions/admin/categories/get-all-categories';
 
-export function OrdersDataTable({
+export function CategoriesDataTable({
     data,
     initialMaxPagesCount,
     tableConfig
-}: EnhancedDataTableProps<GetOrderDataAdminResponse>) {
-    const [usersOrders, setUsersOrders] = useState<GetOrderDataAdminResponse[]>(data);
+}: EnhancedDataTableProps<GetCategoryDataAdminResponse>) {
+    const [categories, setCategories] = useState<GetCategoryDataAdminResponse[]>(data);
     const [page, setPage] = useState<number>(1);
     const [maxPagesCount, setMaxPagesCount] = useState<number>(initialMaxPagesCount);
     const [pageTakeNum, setPagesTakeNum] = useState<number>(tableConfig.defaultPageSize);
@@ -35,7 +31,9 @@ export function OrdersDataTable({
         setOrderBy(orderBy?.sort == "desc" ? null : { order: column, sort: orderBy?.sort === "asc" ? "desc" : "asc" })
     }
 
-    const HeaderCell = ({ title, column }: { title: string, column: string }) => <Button onClick={() => changeOrderBy(column)} className='space-x-2' variant={"ghost"}>
+    const HeaderCell = (
+        { title, column }: { title: string, column: string }
+        ) => <Button onClick={() => changeOrderBy(column)} className='space-x-2' variant={"ghost"}>
         <span className="mr-2">{title}</span>
         {orderBy?.order === column && <ArrowDown className={cn("h-4 w-4", { "rotate-180": orderBy?.order === column && orderBy?.sort === "desc" })} />}
     </Button>
@@ -49,69 +47,31 @@ export function OrdersDataTable({
             cell: ({ row }: { row: any }) => row.getValue('id'),
         },
         {
-            title: "Buyer",
-            accessorKey: 'buyer',
+            title: "Icon",
+            accessorKey: 'icon',
             header: HeaderCell,
-            cell: ({ row }: { row: any }) => <Link href={`./users/${row.getValue('buyer').id}`} className='capitalize'>{row.getValue('buyer').name}</Link>,
+            cell: ({ row }: { row: any }) => <img className='w-6 h-6' src={row.getValue('icon')} alt={row.getValue('icon')} />,
         },
         {
-            title: "Total",
-            accessorKey: 'total',
+            title: "Name",
+            accessorKey: 'name',
             header: HeaderCell,
-            cell: ({ row }: { row: any }) => row.getValue('total'),
+            cell: ({ row }: { row: any }) => row.getValue('name'),
         },
         {
-            title: "Status",
-            accessorKey: 'status',
+            title: "Slug",
+            accessorKey: 'slug',
             header: HeaderCell,
-            cell: ({ row }: { row: any }) => {
-                const status = row.getValue("status")
-
-                const statusVariant = {
-                    "CANCELLED": "destructive",
-                    "DELIVERED": "delivered",
-                    "PENDING": "pending",
-                    "SHIPPED": "success"
-                }[status as OrderStatus] as "destructive" | "success" | "pending" | "delivered"
-
-                return <Select defaultValue={status.toLowerCase()}>
-                    <SelectTrigger>
-                        <Badge className='capitalize' variant={statusVariant}>
-                            {status.toLowerCase()}
-                        </Badge>
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem
-                            className='capitalize'
-                            value={'cancelled'}>cancelled</SelectItem>
-                        <SelectItem
-                            className='capitalize'
-                            value={'delivered'}>delivered</SelectItem>
-                        <SelectItem
-                            className='capitalize'
-                            value={'pending'}>pending</SelectItem>
-                        <SelectItem
-                            className='capitalize'
-                            value={'shipped'}>shipped</SelectItem>
-                    </SelectContent>
-                </Select>
-            },
+            cell: ({ row }: { row: any }) => row.getValue('slug'),
         },
         {
-            title: "Items",
-            accessorKey: 'items',
-            header: () => <span className="mr-2">Items</span>,
-            cell: ({ row }: { row: any }) =>
-                <div>
-                    {row.getValue('items').map(({ product: prd }: any, i: number) => <span key={i}>{prd.name}</span>)}</div>
-            ,
-        },
-        {
-            title: "Quantity",
-            accessorKey: 'quantity',
+            title: "Color",
+            accessorKey: 'color',
             header: HeaderCell,
-            cell: ({ row }: { row: any }) =>
-                <div>{row.getValue('items').reduce((p1: any, p2: any) => (Number(p1.quantity) + Number(p2.quantity)), 0)}</div>,
+            cell: ({ row }: { row: any }) => <div className='flex items-baseline gap-3'>
+                <div className='min-w-4 min-h-4' style={{ background: row.getValue('color') }} />
+                {row.getValue('color')}
+            </div>,
         },
         {
             title: "Created At",
@@ -137,22 +97,22 @@ export function OrdersDataTable({
         }
     }
 
-    const recallAllData = useCallback(async (pageNum: number, take: number = 5, searchQuery: string = "", orderByObj: OrderBy | null) => {
+    const recallAllDate = useCallback(async (pageNum: number, take: number = 5, searchQuery: string = "", orderByObj: OrderBy | null) => {
         setLoading(true);
         setError(null);
 
         try {
-            const { data, error, success } = await getAllOrders(
+            const { data, error, success } = await getAllCategories(
                 pageNum,
                 take,
                 searchQuery,
                 orderByObj
             );
             if (success && data) {
-                setUsersOrders(data);
+                setCategories(data);
             } else if (error) {
-                setError(`Error fetching usersOrders: ${error}`);
-                console.error("Error fetching usersOrders:", error);
+                setError(`Error fetching categories: ${error}`);
+                console.error("Error fetching categories:", error);
             }
         } catch (err) {
             setError('Unexpected error occurred');
@@ -176,12 +136,12 @@ export function OrdersDataTable({
     }, []);
 
     useEffect(() => {
-        recallAllData(page, pageTakeNum, search, orderBy);
-    }, [page, pageTakeNum, recallAllData, tableConfig.defaultPageSize, orderBy]);
+        recallAllDate(page, pageTakeNum, search, orderBy);
+    }, [page, pageTakeNum, recallAllDate, tableConfig.defaultPageSize, orderBy]);
 
     useEffect(() => {
         const timeoutId = setTimeout(() => {
-            recallAllData(page, pageTakeNum, search, orderBy);
+            recallAllDate(page, pageTakeNum, search, orderBy);
             callPagesNumber(pageTakeNum, search);
         }, 1000);
 
@@ -208,7 +168,7 @@ export function OrdersDataTable({
 
     return (
         <div className="space-y-4">
-            {(loading && !(usersOrders.length)) ? (
+            {(loading && !(categories.length)) ? (
                 <div className="flex justify-center items-center p-4">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
                     <span className="ml-2">Loading...</span>
@@ -220,6 +180,7 @@ export function OrdersDataTable({
                     {error}
                 </div>
             )}
+
             <div className='flex gap-2'>
                 <Input placeholder='Search' value={search} onChange={(e) => setSearch((e.target.value).trim())} />
                 {
@@ -239,11 +200,11 @@ export function OrdersDataTable({
                         </tr>
                     </TableHeader>
                     <TableBody className="divide-y divide-gray-200">
-                        {usersOrders.map((userOrder, rowIndex) => (
+                        {categories.map((userOrder, rowIndex) => (
                             <tr onClick={(e) => toggleToSelected(e, userOrder.id as string)} key={userOrder.id || rowIndex} className={cn("hover:bg-gray-50", { "bg-gray-100": selectedList.find((OldId) => OldId == userOrder.id) })}>
                                 {columns.map((column, colIndex) => (
                                     <td key={colIndex} className="cursor-pointer px-4 py-2 text-sm text-gray-900">
-                                        {column.cell ? column.cell({ row: { getValue: (key: string) => userOrder[key as keyof GetOrderDataAdminResponse] } }) : userOrder[column.accessorKey as keyof GetOrderDataAdminResponse]}
+                                        {column.cell ? column.cell({ row: { getValue: (key: string) => userOrder[key as keyof GetCategoryDataAdminResponse] } }) : userOrder[column.accessorKey as keyof GetCategoryDataAdminResponse]}
                                     </td>
                                 ))}
                             </tr>

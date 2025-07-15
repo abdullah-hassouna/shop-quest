@@ -45,6 +45,11 @@ export default async function OrdersTab() {
                     {error.map(err => err)}
                 </div>
             ) : <></>}
+
+            <div className='flex justify-between items-center'>
+                <span className='text-2xl font-bold'>Orders</span>
+            </div>
+
             <OrdersDataTable
                 key={"order-data-table"}
                 data={initialOrders}
