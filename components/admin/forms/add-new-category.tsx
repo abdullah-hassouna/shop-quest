@@ -2,7 +2,6 @@ import { ColorPicker } from '@/components/ColorPicker';
 import { ImageUploadComponent } from '@/components/ImageUploadComponent';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { newCategoryValidation } from '@/validation/category-validation';
 import { Formik } from 'formik';
@@ -118,7 +117,7 @@ function AddNewCategoryForm() {
                         />
                     </div>
                     <div>
-                        <ImageUploadComponent setImagesValue={setValues} imagesValue={values?.icon} imagesCountLimit={1} />
+                        <ImageUploadComponent imageKeyName='icon' setImagesValue={setValues} imagesValue={values?.icon} imagesCountLimit={1} />
                         <small className='mt-5 font-bold text-red-700'>{errors.icon && touched.icon && errors.icon}</small>
                     </div>
                     <div>

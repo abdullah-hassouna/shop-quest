@@ -12,7 +12,7 @@ export interface UploadedFile {
     url: string;
 }
 
-export const ImageUploadComponent = ({ setImagesValue, imagesValue, imagesCountLimit }: { setImagesValue: any, imagesValue: UploadedFile[], imagesCountLimit: number }) => {
+export const ImageUploadComponent = ({ setImagesValue, imagesValue, imagesCountLimit, imageKeyName = "images" }: { setImagesValue: any, imagesValue: UploadedFile[], imagesCountLimit: number, imageKeyName?: string }) => {
     const [isDragging, setIsDragging] = useState<boolean>(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -27,12 +27,12 @@ export const ImageUploadComponent = ({ setImagesValue, imagesValue, imagesCountL
             size: file.size,
             url: URL.createObjectURL(file)
         }));
-        setImagesValue((prev: { images: UploadedFile[] }) => {
-            console.log({ ...prev, ...newFiles })
-            if (prev.images) {
-                if (prev.images.length === 0) return { ...prev, images: newFiles }
-                if (imagesCountLimit === prev.images.length) return prev
-                return { ...prev, images: [...(prev.images), ...newFiles] }
+
+        setImagesValue((prev: { [imageKeyName]: UploadedFile[] }) => {
+            if (prev[imageKeyName]) {
+                if (prev[imageKeyName].length === 0) return { ...prev, [imageKeyName]: newFiles }
+                if (imagesCountLimit === prev[imageKeyName].length) return prev
+                return { ...prev, [imageKeyName]: [...(prev[imageKeyName]), ...newFiles] }
             }
         });
     };
@@ -65,11 +65,12 @@ export const ImageUploadComponent = ({ setImagesValue, imagesValue, imagesCountL
         e.stopPropagation()
         setImagesValue((prev: any) => ({
             ...prev,
-            images: imagesValue.filter(f => f.id !== fileId)
+            [imageKeyName]: imagesValue.filter(f => f.id !== fileId)
         }))
     };
 
     const openFileDialog = (): void => {
+        if (imagesCountLimit === imagesValue.length) return
         fileInputRef.current?.click();
     };
 
