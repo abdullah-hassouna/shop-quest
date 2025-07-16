@@ -31,7 +31,6 @@ export function UsersDataTable({
     const [search, setSearch] = useState<string>("");
     const [selectedList, setSelectedList] = useState<string[]>([]);
 
-
     const columns = [
         {
             title: "Name",

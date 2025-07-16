@@ -14,6 +14,7 @@ import { EnhancedDataTableProps, OrderBy } from '@/types/general';
 import { getAllOrders, getAllOrdersPages } from '@/actions/admin/order/get-all-orders-data';
 import { OrderStatus } from '@prisma/client';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
+import { HeaderCell } from './HeaderTable';
 
 export function OrdersDataTable({
     data,
@@ -29,16 +30,6 @@ export function OrdersDataTable({
     const [orderBy, setOrderBy] = useState<OrderBy | null>(null);
     const [search, setSearch] = useState<string>("");
     const [selectedList, setSelectedList] = useState<string[]>([]);
-
-
-    const changeOrderBy = (column: string) => {
-        setOrderBy(orderBy?.sort == "desc" ? null : { order: column, sort: orderBy?.sort === "asc" ? "desc" : "asc" })
-    }
-
-    const HeaderCell = ({ title, column }: { title: string, column: string }) => <Button onClick={() => changeOrderBy(column)} className='space-x-2' variant={"ghost"}>
-        <span className="mr-2">{title}</span>
-        {orderBy?.order === column && <ArrowDown className={cn("h-4 w-4", { "rotate-180": orderBy?.order === column && orderBy?.sort === "desc" })} />}
-    </Button>
 
 
     const columns = [
@@ -235,7 +226,7 @@ export function OrdersDataTable({
                     <TableHeader className="bg-gray-50">
                         <tr>
                             {columns.map((column, index) => <th className="px-4 py-2 text-left text-sm font-medium text-gray-900" key={index} >
-                                <column.header title={column.title} column={column.accessorKey} /></th>)}
+                                <column.header orderBy={orderBy} setOrderBy={setOrderBy} title={column.title} column={column.accessorKey} /></th>)}
                         </tr>
                     </TableHeader>
                     <TableBody className="divide-y divide-gray-200">

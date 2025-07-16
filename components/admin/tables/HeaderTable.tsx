@@ -3,8 +3,6 @@ import { cn } from "@/lib/utils"
 import { OrderBy } from "@/types/general"
 import { ArrowDown } from "lucide-react"
 
-
-
 export const HeaderCell = ({ title, column, orderBy, setOrderBy }: { title: string, column: string, orderBy: OrderBy | null, setOrderBy: Function }) => {
 
     const changeOrderBy = (column: string) => {
