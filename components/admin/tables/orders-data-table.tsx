@@ -15,6 +15,7 @@ import { getAllOrders, getAllOrdersPages } from '@/actions/admin/order/get-all-o
 import { OrderStatus } from '@prisma/client';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import { HeaderCell } from './HeaderTable';
+import OrderDataOptions from '../dialogs/OrderDataOptions';
 
 export function OrdersDataTable({
     data,
@@ -97,19 +98,26 @@ export function OrdersDataTable({
                     {row.getValue('items').map(({ product: prd }: any, i: number) => <span key={i}>{prd.name}</span>)}</div>
             ,
         },
-        {
-            title: "Quantity",
-            accessorKey: 'quantity',
-            header: HeaderCell,
-            cell: ({ row }: { row: any }) =>
-                <div>{row.getValue('items').reduce((p1: any, p2: any) => (Number(p1.quantity) + Number(p2.quantity)), 0)}</div>,
-        },
+        // {
+        //     title: "Quantity",
+        //     accessorKey: 'quantity',
+        //     header: HeaderCell,
+        //     cell: ({ row }: { row: any }) =>
+        //         <div>{row.getValue('items').reduce((p1: any, p2: any) => (Number(p1.quantity) + Number(p2.quantity)), 0)}</div>,
+        // },
         {
             title: "Created At",
             accessorKey: 'createdAt',
             header: HeaderCell,
             cell: ({ row }: { row: any }) => row.getValue('createdAt').toLocaleDateString(),
-        },
+        }, {
+            title: "Actions",
+            accessorKey: 'actions',
+            header: () => <>Actions</>,
+            cell: ({ row }: { row: any }) => (
+                <OrderDataOptions row={row} />
+            )
+        }
     ];
 
 

@@ -1,12 +1,14 @@
 "use server"
 
 import { getOneProductDataAction } from "@/actions/admin/products/get-one-product";
-import ImagesCarousel from "@/components/carousel/ImagesEmblaCarousel";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { GetOneProductDataAdminResponse } from "@/types/get-data-response";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Calendar, DollarSign, Package, Tag, User } from "lucide-react";
 import Link from "next/link";
+
 
 interface UserDataFormProps {
     params: Promise<{ productId: string }>;
@@ -52,74 +54,107 @@ export default async function ProductDataForm({ params: paramsPromise }: UserDat
     );
 
     return (
-
-        <div className='min-h-screen'>
+        <div className='min-h-screen bg-gray-50/40 p-6'>
             {errors.length > 0 && <ErrorDisplay errors={errors} />}
 
             {!errors.length && initialProduct && (
-                <main className='container mx-auto px-4 py-8'>
-                    <div className='flex flex-col gap-8'>
-                        <div className='space-y-6'>
-
-                            <div className="p-4 bg-accent-foreground/50 rounded-md text-white">
-                                <span>Added by:</span>
-                                <div className="w-fit mt-3 grid grid-cols-4 grid-rows-2 gap-0" >
-                                    <Avatar className="col-span-1 row-span-2 h-14 w-14 ">
-                                        <AvatarImage src={initialProduct.seller.image} />
-                                        <AvatarFallback className="bg-foreground">{initialProduct.seller.name.split("")[0]}</AvatarFallback>
-                                    </Avatar>
-                                    <Link href={`../users/${initialProduct.seller.id}`} className="col-span-3 row-span-1">
-                                        {initialProduct.seller.name}
-                                    </Link>
-                                    <div className="col-span-3 row-span-1">
-                                        <span>
-                                            at: {initialProduct.createdAt.toLocaleString()}
+                <div className='max-w-7xl mx-auto space-y-6'>
+                    {/* Header Section */}
+                    <Card>
+                        <CardHeader>
+                            <div className="flex justify-between items-start">
+                                <div className="space-y-2">
+                                    <CardTitle className="text-2xl flex items-center gap-3">
+                                        {initialProduct?.name || 'Product Title'}
+                                        <Badge style={{ background: initialProduct.category.color }}>
+                                            <img src={initialProduct.category.icon} alt={initialProduct.category.name} className="w-4 h-4 mr-1" />
+                                            <span className="capitalize">{initialProduct.category.name}</span>
+                                        </Badge>
+                                    </CardTitle>
+                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                        <DollarSign className="w-4 h-4" />
+                                        <span className="text-xl font-semibold">
+                                            {initialProduct?.price?.toFixed(2) || ''}
                                         </span>
                                     </div>
                                 </div>
-                            </div>
-                            <div className="flex gap-5 flex-wrap items-baseline">
-                                <h1 className='text-3xl font-bold '>
-                                    {initialProduct?.name || 'Product Title'}
-                                </h1>
 
-                                <Badge style={{ background: initialProduct.category.color }}>
-                                    <img src={initialProduct.category.icon} alt={initialProduct.category.name} className="mx-1" /> <span className="capitalize">{initialProduct.category.name}</span>
-                                </Badge>
+                                {/* Seller Info */}
+                                <Card className="bg-primary text-primary-foreground p-4">
+                                    <div className="flex items-start gap-4">
+                                        <Avatar className="h-12 w-12">
+                                            <AvatarImage src={initialProduct.seller.image} />
+                                            <AvatarFallback>{initialProduct.seller.name.split("")[0]}</AvatarFallback>
+                                        </Avatar>
+                                        <div className="space-y-1">
+                                            <Link
+                                                href={`../users/${initialProduct.seller.id}`}
+                                                className="font-medium hover:underline"
+                                            >
+                                                {initialProduct.seller.name}
+                                            </Link>
+                                            <div className="flex items-center text-sm gap-1">
+                                                <Calendar className="w-4 h-4" />
+                                                {new Date(initialProduct.createdAt).toLocaleDateString()}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Card>
                             </div>
-                            <p className='text-xl font-semibold text-gray-700'>
-                                ${initialProduct?.price?.toFixed(2) || ''}
-                            </p>
-                            <div className="w-[50%] flex gap-2 flex-wrap">
-                                {initialProduct.tags.map(t => <Badge key={t.id} className="capitalize" variant={"secondary"} >
-                                    {t.name}
-                                </Badge>)}
-                            </div>
-                            <div
-                                className='text-gray-500'
-                                dangerouslySetInnerHTML={{
-                                    __html:
-                                        initialProduct?.description || '',
-                                }}
-                            />
-                        </div>
-                        <div className='grid grid-cols-4 gap-5'>
-                            {initialProduct?.imagesId.map(img =>
-                                <img className="w-52 h-auto object-contain" src={img.url} alt={img.alt} id={img.id} />
-                            )}
-                        </div>
-                    </div>
-                </main>
-            )
-            }
+                        </CardHeader>
 
-            {
-                isLoading && (
-                    <div className="flex items-center justify-center py-8">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                    </div>
-                )
-            }
-        </div >
+                        <CardContent className="space-y-6">
+                            {/* Tags */}
+                            <div className="flex items-center gap-2">
+                                <Tag className="w-4 h-4 text-muted-foreground" />
+                                <div className="flex gap-2 flex-wrap">
+                                    {initialProduct.tags.map(t => (
+                                        <Badge key={t.id} variant="secondary" className="capitalize">
+                                            {t.name}
+                                        </Badge>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <Separator />
+
+                            {/* Description */}
+                            <div className="prose max-w-none">
+                                <div
+                                    className='text-gray-600'
+                                    dangerouslySetInnerHTML={{
+                                        __html: initialProduct?.description || '',
+                                    }}
+                                />
+                            </div>
+
+                            <Separator />
+
+                            {/* Images Gallery */}
+                            <div>
+                                <h3 className="text-lg font-semibold mb-4">Product Images</h3>
+                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                    {initialProduct?.imagesId.map(img => (
+                                        <div key={img.id} className="aspect-square rounded-lg overflow-hidden border bg-white">
+                                            <img
+                                                className="w-full h-full object-contain hover:scale-105 transition-transform"
+                                                src={img.url}
+                                                alt={img.alt}
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+            )}
+
+            {isLoading && (
+                <div className="flex items-center justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                </div>
+            )}
+        </div>
     )
 }

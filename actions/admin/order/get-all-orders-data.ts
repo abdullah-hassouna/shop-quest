@@ -62,6 +62,8 @@ export const getAllOrders = cache(async (page: string | number, take: number = 2
                         product: {
                             select: {
                                 name: true,
+                                id: true,
+                                price: true
                             }
                         }
                     }

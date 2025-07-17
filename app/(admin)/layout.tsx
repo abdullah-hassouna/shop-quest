@@ -1,7 +1,6 @@
 "use server"
 
 import getUserSession from '@/actions/auth/regisreation/get-user-session';
-import { redirect, } from 'next/navigation';
 import { Button } from "@/components/ui/button"
 import {
     Bell,
@@ -11,6 +10,8 @@ import {
 } from "lucide-react"
 import Link from 'next/link';
 import { NavigationContent } from '@/components/admin/sidebar';
+import { redirect } from 'next/navigation';
+import { RedirectType } from 'next/navigation';
 
 
 interface LayoutProps {
@@ -18,28 +19,32 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
+
+    function redirectUnauthedUser() {
+        redirect('/', RedirectType.replace);
+    }
+
     const getCurrentUserRole = async () => {
         try {
             const { success, sessionExpired, userData } = await getUserSession();
 
             if (!success || sessionExpired || !userData) {
-                redirect('/');
+                redirectUnauthedUser()
                 return;
             }
 
             if (!userData.role.startsWith('ADMIN')) {
-                redirect('/');
+                redirectUnauthedUser()
                 return;
             }
 
         } catch (error) {
             console.error("Error fetching user session:", error);
-            redirect('/');
+            redirectUnauthedUser()
         }
     };
 
     getCurrentUserRole();
-    console.log('Layout re-rendering'); // This will tell you if layout is the issue
 
 
     return (

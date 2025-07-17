@@ -13,6 +13,7 @@ import Link from 'next/link';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { EnhancedDataTableProps, OrderBy } from '@/types/general';
 import { HeaderCell } from './HeaderTable';
+import ProductDataOprions from '../dialogs/ProductDataOptions';
 
 export function ProductsDataTable({
     data: initialData,
@@ -80,18 +81,7 @@ export function ProductsDataTable({
             accessorKey: 'actions',
             header: () => <>Actions</>,
             cell: ({ row }: { row: any }) => (
-                <div className='border border-black w-fit rounded-md flex px-1.5 items-center justify-evenly'>
-                    <Link href={`products/${row.getValue("id")}`} className='transition-all hover:bg-black hover:text-white rounded-md p-1'>
-                        <Eye className='w-5 h-5' />
-                    </Link>
-                    <span className='px-0.5 text-xl pb-1.5'>|</span>
-                    <Popover>
-                        <PopoverTrigger className='transition-all hover:bg-black hover:text-white rounded-md p-1' ><MoreVertical className='w-5 h-5' /></PopoverTrigger>
-                        <PopoverContent>
-                            Check This
-                        </PopoverContent>
-                    </Popover>
-                </div>
+                <ProductDataOprions row={row} />
             )
         }
     ];

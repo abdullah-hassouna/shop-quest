@@ -11,6 +11,7 @@ import { EnhancedDataTableProps, OrderBy } from '@/types/general';
 import { getAllOrders, getAllOrdersPages } from '@/actions/admin/order/get-all-orders-data';
 import { getAllCategories } from '@/actions/admin/categories/get-all-categories';
 import { HeaderCell } from './HeaderTable';
+import CategoryDataOprions from '../dialogs/CategoryDataOptions';
 
 export function CategoriesDataTable({
     data,
@@ -62,6 +63,14 @@ export function CategoriesDataTable({
             header: HeaderCell,
             cell: ({ row }: { row: any }) => row.getValue('createdAt').toLocaleDateString(),
         },
+        {
+            title: "Actions",
+            accessorKey: 'actions',
+            header: () => <>Actions</>,
+            cell: ({ row }: { row: any }) => (
+                <CategoryDataOprions row={row} />
+            )
+        }
     ];
 
 

@@ -1,20 +1,18 @@
 "use client";
 
-import { useState, useEffect, useCallback, MouseEvent } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getAllUsers, getAllUsersPages } from "@/actions/admin/users/get-all-users";
 import type { GetOneUserDataAdminResponse } from "@/types/get-data-response"
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Table, TableBody, TableHeader, TableRow } from '@/components/ui/table';
-import { ArrowDown, ArrowLeft, BlocksIcon, DeleteIcon, Edit2Icon, Eye, MoreVertical, RemoveFormattingIcon, ShieldCheck, Ungroup, X } from 'lucide-react';
+import { ArrowLeft, ShieldCheck } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import UserActionDialog from '@/components/dialogs/user-actions';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
-import Link from 'next/link';
 import { EnhancedDataTableProps, OrderBy } from '@/types/general';
 import { HeaderCell } from './HeaderTable';
+import UserDataOprions from '../dialogs/UserDataOptions';
 
 export function UsersDataTable({
     data,
@@ -49,8 +47,8 @@ export function UsersDataTable({
                         {row.getValue('email')}
                     </span>
                 </div></HoverCardTrigger>
-                <HoverCardContent>
-                    {row.getValue('emailVerified') ? <span>User Email is <span className='text-green-500 font-bold'>Verfied</span></span> : <span>User Email is <span className='font-bold text-red-500'>NOT Verified</span></span>}
+                <HoverCardContent className='py-1 px-3 w-fit'>
+                    <span className='text-xs'>User Email is {row.getValue('emailVerified') ? <span className='text-green-500 font-bold'>Verfied</span> : <span className='font-bold text-red-500'>NOT Verified</span>}</span>
                 </HoverCardContent>
 
             </HoverCard>,
@@ -77,43 +75,7 @@ export function UsersDataTable({
             title: "Actions",
             accessorKey: 'actions',
             header: () => <>Actions</>,
-            cell: ({ row }: { row: any }) => (
-                <div className='border border-black w-fit rounded-md flex px-1.5 items-center justify-evenly'>
-                    <Link href={`users/${row.getValue("id")}`} className='transition-all hover:bg-black hover:text-white rounded-md p-1'>
-                        <Eye className='w-5 h-5' />
-                    </Link>
-                    <span className='px-0.5 text-xl pb-1.5'>|</span>
-                    <Popover>
-                        <PopoverTrigger className='transition-all hover:bg-black hover:text-white rounded-md p-1' ><MoreVertical className='w-5 h-5' /></PopoverTrigger>
-                        <PopoverContent className='max-w-40 p-0'>
-                            <div className='px-1 py-2 justify-between items-start flex flex-col gap-2'>
-                                <UserActionDialog user={{
-                                    id: row.getValue("id"),
-                                    name: row.getValue("name"),
-                                    image: row.getValue("image"),
-                                    email: row.getValue("email"),
-                                    emailVerified: row.getValue("emailVerified"),
-                                    role: row.getValue("role").toLowerCase(),
-                                    sessions: row.getValue("sessions"),
-                                    createdAt: row.getValue("createdAt"),
-                                    updatedAt: row.getValue("updatedAt")
-                                }} className='w-full' >
-                                    <Button variant={"ghost"} className='flex justify-start items-center gap-2 w-full px-1.5 group hover:bg-blue-900 rounded-md'>
-                                        <Edit2Icon className='group-hover:font-bold group-hover:text-white text-blue-800 w-4 h-4' /> <span className='group-hover:font-bold group-hover:text-white text-blue-800'>Edit</span>
-                                    </Button>
-                                </UserActionDialog>
-                                <Button variant={"ghost"} className='flex justify-start items-center gap-2 w-full px-1.5 group hover:bg-black rounded-md'>
-                                    <Ungroup className='group-hover:font-bold group-hover:text-white text-gray-800 w-4 h-4' /> <span className='group-hover:font-bold group-hover:text-white text-gray-800'>Ban</span>
-                                </Button>
-                                <Button variant={"ghost"} className='flex justify-start items-center gap-2 w-full px-1.5 group hover:bg-red-600 rounded-md'>
-                                    <X className='group-hover:font-bold group-hover:text-white text-red-600 w-4 h-4' /> <span className='group-hover:font-bold group-hover:text-white text-red-600'>Delete</span>
-                                </Button>
-                            </div>
-                        </PopoverContent>
-                    </Popover>
-                </div>
-
-            ),
+            cell: ({ row }: { row: any }) => (<UserDataOprions row={row} />),
         },
     ];
 

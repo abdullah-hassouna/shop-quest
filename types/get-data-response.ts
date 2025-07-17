@@ -19,7 +19,7 @@ export interface GetOrderDataAdminResponse {
     id: string | null;
     total: number;
     status: OrderStatus;
-    items: Array<{ product: { name: string, }, quantity: number }>;
+    items: Array<{ product: { name: string, id: string | null, price: number }, quantity: number }>;
     createdAt: Date;
     buyer: {
         id: string | null;

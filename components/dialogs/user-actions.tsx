@@ -6,7 +6,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
-import { GetUserDataResponse } from '@/types/get-data-response'
+import { GetUserDataAdminResponse } from '@/types/get-data-response'
 import { updateUserData } from '@/actions/admin/users/update-user-data'
 import { Formik } from 'formik'
 import { Label } from '../ui/label'
@@ -15,7 +15,7 @@ import { Input } from '../ui/input'
 import { editUserDataValidationSchema } from '@/validation/auth-validation'
 
 
-const UserActionDialog = ({ children, className, disabled, user }: { children: React.ReactNode, className?: string, disabled?: boolean, user: GetUserDataResponse },) => {
+const UserActionDialog = ({ children, className, disabled, user }: { children: React.ReactNode, className?: string, disabled?: boolean, user: GetUserDataAdminResponse },) => {
 
 
     return (
