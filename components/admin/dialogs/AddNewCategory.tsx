@@ -2,7 +2,7 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import React, { ReactNode } from 'react'
-import AddNewCategoryForm from '../forms/add-new-category'
+import AddNewCategoryForm from '../data-form/add-new-category'
 
 interface AddNewCategoryProps {
     children: ReactNode
