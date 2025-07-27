@@ -48,7 +48,7 @@ export function UsersDataTable({
                     </span>
                 </div></HoverCardTrigger>
                 <HoverCardContent className='py-1 px-3 w-fit'>
-                    <span className='text-xs'>User Email is {row.getValue('emailVerified') ? <span className='text-green-500 font-bold'>Verfied</span> : <span className='font-bold text-red-500'>NOT Verified</span>}</span>
+                    <span className='text-xs'>User Email is {row.getValue('emailVerified') ? <span className='text-green-500 font-bold'>Verfied</span> : <span className='font-bold text-primary'>NOT Verified</span>}</span>
                 </HoverCardContent>
 
             </HoverCard>,

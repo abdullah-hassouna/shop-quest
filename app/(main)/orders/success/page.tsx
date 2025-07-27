@@ -23,7 +23,7 @@ export default function OrderSuccess() {
         <div className='text-center space-y-4'>
           <p className='text-gray-400 pb-5'>Thank you for your purchase!</p>
           <Link href='/'>
-            <Button className='bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 hover:from-purple-600 hover:via-pink-600 hover:to-red-600 text-white font-semibold cursor-pointer'>
+            <Button className='bg-gradient-to-r from-purple-500 via-pink-500 to-primary hover:from-purple-600 hover:via-pink-600 hover:to-red-600 text-white font-semibold cursor-pointer'>
               Continue Shopping
             </Button>
           </Link>

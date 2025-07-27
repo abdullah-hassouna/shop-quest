@@ -5,12 +5,12 @@ import getUserSession from "../auth/regisreation/get-user-session"
 
 
 export interface OrderItemInterface extends OrderItem {
+    quantity: number;
     product: Product
 }
 
 export interface OrderInterface extends Order {
     items: OrderItemInterface[];
-    itemsCalled: boolean;
 }
 
 
@@ -25,8 +25,27 @@ export async function getOrders(): Promise<{
         const orders = await prisma?.order.findMany({
             where: {
                 buyerId: userData?.id
+            },
+            select: {
+                id: true,
+                createdAt: true,
+                total: true,
+                status: true,
+                items: {
+                    select: {
+                        quantity: true,
+                        product: {
+                            select: {
+                                id: true,
+                                name: true,
+                                price: true,
+                                imagesId: true,
+                            }
+                        }
+                    }
+                }
             }
-        }) as OrderInterface[]
+        }) as unknown as OrderInterface[]
 
         if (orders) {
             return {

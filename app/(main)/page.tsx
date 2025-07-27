@@ -1,71 +1,74 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { ArrowRight } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { getCatalogryWithProducts } from '@/actions/products/get-category-with-products';
-
-import ProductCatalog from '@/components/ProductCategory';
+import ProductCategories from '@/components/ProductCategories';
+import JustForYou from '@/components/JustForYou';
+import TrendyProducts from '@/components/TrendyProducts';
 import { Toaster } from '@/components/ui/sonner';
-import getUserSession from '@/actions/auth/regisreation/get-user-session';
+import { useEffect, useState } from 'react';
+import { getAllCategoriesData } from '@/actions/categories/get-all-categories';
+import { GetCategoryDataResponse, GetProductDataResponse } from '@/types/get-data-response';
+import { getGroupProductsData } from '@/actions/products/get-group-products-data';
+
 
 export default function HomePage() {
-  const [categories, setCategories] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+
+
+  const [products, setProducts] = useState<GetProductDataResponse[]>([]);
+  const [categories, setCategories] = useState<GetCategoryDataResponse[]>([]);
 
   useEffect(() => {
-    getUserSession()
-    const getData = async () => {
-      const { categories } = await getCatalogryWithProducts();
-      setCategories(categories || []);
-      setIsLoading(false);
+    const fetchAllCategories = async () => {
+      const { categoriesData, error } = await getAllCategoriesData(6);
+      if (categoriesData && !error) {
+        setCategories(categoriesData);
+      }
     };
-    getData();
+
+
+    const fetchProducts = async () => {
+      const { error, products } = await getGroupProductsData(24);
+      if (products && !error) {
+        setProducts(products);
+      }
+    };
+
+    fetchAllCategories();
+    fetchProducts();
   }, []);
 
   return (
-    <div className='min-h-screen'>
+    <div className='min-h-screen bg-gray-50'>
       <Toaster />
-      <main className='container mx-auto px-4 py-8'>
-        <section className='mb-12 '>
-          <div className='relative overflow-hidden rounded-lg shadow-lg '>
-            <div className='w-full h-[400px] relative'>
-              <div className='absolute inset-0 flex flex-col justify-center items-center text-center p-8'>
-                <h2 className='text-4xl font-bold mb-4 bg-gradient-to-r from-purple-600 via-pink-500 to-red-500 bg-clip-text text-transparent z-3'>
-                  Welcome to our Store!
-                </h2>
-                <p className='text-xl mb-8 text-gray-700 z-4'>
-                  Discover the latest trends and exclusive deals on your
-                  favorite products. Shop now and enjoy a seamless shopping
-                  experience!
-                </p>
-                <img
-                  src='https://assets.entrepreneur.com/content/3x2/2000/20150812074510-Online-shopping.jpeg?format=pjeg&auto=webp&crop=16:9&width=675&height=380'
-                  alt='Hero Image'
-                  className='absolute inset-0 w-full h-full object-cover opacity-20 z-1'
-                />
-                <Button className='bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 hover:from-purple-600 hover:via-pink-600 hover:to-red-600 text-white z-2 cursor-pointer'>
-                  Shop Now
-                  <ArrowRight className='ml-2 h-4 w-4' />
-                </Button>
-              </div>
+      <main className='container mx-auto px-4'>
+        <section className='relative bg-white'>
+          <div className='flex flex-col md:flex-row items-center justify-between'>
+            <div className='md:w-1/2 text-center md:text-left p-8'>
+              <p className='text-lg text-gray-500'>Starting At Only $20.5</p>
+              <h1 className='text-5xl font-bold my-4'>
+                <span className='text-gray-800'>SUMMER SPECIAL</span>
+                <br />
+                <span className='text-primary'>COLLECTION</span>
+              </h1>
+              <p className='text-gray-600 mb-8'>
+                Find the perfect outfit for any occasion.
+              </p>
+              <Button className='bg-primary text-white px-8 py-3 rounded-full font-bold hover:bg-primary/90'>
+                Shop Now
+              </Button>
+            </div>
+            <div className='md:w-1/2'>
+              <img
+                src='hero-image.png'
+                alt='Summer Collection'
+                className='w-full h-auto rounded-2xl'
+              />
             </div>
           </div>
         </section>
-        {isLoading && (
-          <div className='flex justify-center items-center h-64'>
-            <div className='animate-spin rounded-full h-10 w-10 border-b-2 border-purple-900'></div>
-          </div>
-        )}
-        {categories.map((category: any) => (
-          <ProductCatalog
-            key={category?.id}
-            category={category}
-            products={
-              category.products as unknown as any[]
-            }
-          />
-        ))}
+        <ProductCategories categories={categories} />
+        <JustForYou categories={categories} products={products} />
+        <TrendyProducts products={products.slice(0, 10)} />
       </main>
     </div>
   );

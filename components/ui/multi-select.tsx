@@ -283,7 +283,7 @@ export const MultiSelect = React.forwardRef<
                             placeholder="Search..."
                             onKeyDown={handleInputKeyDown}
                         />
-                        <CommandList>
+                        <CommandList defaultValue={defaultValue}>
                             <CommandEmpty>No results found.</CommandEmpty>
                             <CommandGroup>
                                 <CommandItem

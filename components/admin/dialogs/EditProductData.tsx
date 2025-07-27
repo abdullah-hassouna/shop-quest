@@ -8,17 +8,6 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
-import { Formik, Form, Field, ErrorMessage } from 'formik'
 import * as Yup from 'yup'
 import { ReactNode } from "react"
 import { DialogTrigger } from "@radix-ui/react-dialog"
@@ -29,9 +18,9 @@ export interface Product {
     name: string
     description: string
     price: number
-    category: string
+    category: any
     images: Array<{ id: string, url: string, alt: string }>
-    tags: Array<{ id: string, name: string, alt: string }>
+    tags: Array<{ id: string, name: string, alt: string, slug: string }>
 }
 
 interface EditProductDataProps {
@@ -63,8 +52,8 @@ export function EditProductData({
     return (
         <Dialog>
             <DialogTrigger className={className}>{children}</DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
+            <DialogContent>
+                <DialogHeader className="mb-5">
                     <DialogTitle>{product.name}</DialogTitle>
                 </DialogHeader>
                 <EditProductForm product={product} validationSchema={validationSchema} />

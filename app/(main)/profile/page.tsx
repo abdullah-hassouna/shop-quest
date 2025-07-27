@@ -9,7 +9,7 @@ import { getOrders } from '@/actions/orders/get-orders';
 import type { Order, OrderItem } from "@prisma/client"
 import { redirect } from 'next/navigation';
 import useUserDataStore, { UserState } from '@/store/user-store';
-import EditUserDataForm from '@/components/forms/edit-user-data';
+// import EditUserDataForm from '@/components/forms/edit';
 import ChangeProfileImgDialog from '@/components/dialogs/change-profile-img';
 
 interface UserStats {
@@ -60,7 +60,7 @@ export default function ProfilePage() {
   return (
     <div className='min-h-screen  p-8'>
       <div className='max-w-4xl mx-auto'>
-        <h1 className='text-4xl font-bold text-center mb-12  bg-gradient-to-r from-purple-600 via-pink-500 to-red-500 bg-clip-text text-transparent'>
+        <h1 className='text-4xl font-bold text-center mb-12  bg-gradient-to-r from-purple-600 via-pink-500 to-primary bg-clip-text text-transparent'>
           My Profile
         </h1>
 
@@ -73,13 +73,13 @@ export default function ProfilePage() {
             <div className='bg-gray-2 border-2 p-6 rounded-lg shadow-lg '>
               <div className='flex items-center space-x-4'>
                 <Avatar className='relative group cursor-pointer h-24 w-24 text-6xl text-purple-500'>
-                  <AvatarImage src={user.image} alt={user.name} />
+                  <AvatarImage src={user.image!} alt={user.name!} />
                   <ChangeProfileImgDialog children={<div className='absolute flex justify-center transition-all rounded-full ease-in-out items-center translate-x-[-50%] left-[50%] h-24 w-24 translate-y-[-50%] top-[200%] opacity-50 group-hover:top-[50%] bg-black'>
                     <Edit2 />
                   </div>}>
                   </ChangeProfileImgDialog>
                   <AvatarFallback className='bg-purple-500 text-gray-100'>
-                    {user.name.split(" ")[0].charAt(0).toUpperCase()}
+                    {user.name!.split(" ")[0].charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 <div>
@@ -113,7 +113,7 @@ export default function ProfilePage() {
                 />
               </div>
             </div>
-            <EditUserDataForm {...user} />
+            {/* <EditUserDataForm {...user} /> */}
           </div>
         )}
       </div>

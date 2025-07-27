@@ -16,6 +16,7 @@ const EditUserDataForm = (initialValues: UserDataInterface) => (
             validationSchema={editUserDataValidationSchema}
             onSubmit={async (values, { setSubmitting }) => {
                 setSubmitting(false)
+                console.log(values)
                 // redirect('')
             }}
         >
@@ -96,15 +97,14 @@ const EditUserDataForm = (initialValues: UserDataInterface) => (
                         {errors.confirmPassword && touched.confirmPassword && errors.confirmPassword}
                     </small>
                 </div>
-                <ConfirmUserDialog disabled={(errors.password || errors.confirmPassword || errors.email || errors.fullname) ? true : false} newUserData={values as UserNewDataProps} oldUserData={initialValues} className='w-full bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 hover:from-purple-600 hover:via-pink-600 hover:to-red-600 text-white text-base sm:text-xl font-bold p-4 sm:p-6 rounded-md shadow-xl transition-colors duration-300 ease-in-out cursor-pointer'>
+                <ConfirmUserDialog disabled={(errors.password || errors.confirmPassword || errors.email || errors.fullname) ? true : false} newUserData={values as UserNewDataProps} oldUserData={initialValues} className='w-full bg-gradient-to-r from-purple-500 via-pink-500 to-primary hover:from-purple-600 hover:via-pink-600 hover:to-red-600 text-white text-base sm:text-xl font-bold p-4 sm:p-6 rounded-md shadow-xl transition-colors duration-300 ease-in-out cursor-pointer'>
                     Save
                 </ConfirmUserDialog>
-                <Button
-                    className='hidden'
+                <button
                     type='submit'
                     disabled={isSubmitting}
                 >'Save'
-                </Button>
+                </button>
             </form>
             )}
         </Formik >

@@ -138,12 +138,12 @@ export default function Dashboard() {
                                 <div>
                                     <div className="text-2xl font-bold">3.24%</div>
                                     <div className="flex items-center text-xs text-muted-foreground">
-                                        <ArrowDownRight className="mr-1 h-3 w-3 text-red-500" />
-                                        <span className="text-red-500">-0.4%</span>
+                                        <ArrowDownRight className="mr-1 h-3 w-3 text-primary" />
+                                        <span className="text-primary">-0.4%</span>
                                     </div>
                                 </div>
                                 <div className="flex items-center">
-                                    <TrendingDown className="h-8 w-8 text-red-500" />
+                                    <TrendingDown className="h-8 w-8 text-primary" />
                                 </div>
                             </div>
                         </CardContent>

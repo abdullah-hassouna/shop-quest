@@ -1,6 +1,7 @@
 "use server"
 
 import prisma from "@/lib/prisma";
+import { GetProductDataResponse } from "@/types/get-data-response";
 import { ProductInterface } from "@/types/product-type";
 
 
@@ -17,7 +18,7 @@ export interface PaginationProps {
 export async function searchProductsAction(searchWord: string, pagination: PaginationProps = { index: "0", count: "12" }, tags?: string[], filters?: FilterProps): Promise<{
     success: boolean;
     error: string;
-    products: ProductInterface[]
+    products: GetProductDataResponse[]
 }> {
     const index = ((Number(pagination.index) > -1 ? Number(pagination.index) : 0)) + 1;
     const count = Number(pagination.count) > 5 && Number(pagination.count) < 10 ? Number(pagination.count) : 8
@@ -55,7 +56,32 @@ export async function searchProductsAction(searchWord: string, pagination: Pagin
 
             },
             include: {
-                imagesId: true
+                imagesId: true,
+                seller: {
+                    select: {
+                        id: true,
+                        name: true,
+                        image: true,
+                    }
+                },
+                category: true,
+                tags: true,
+                Review: {
+                    select: {
+                        id: true,
+                        rating: true,
+                        comment: true,
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                image: true,
+                            }
+                        },
+                        createdAt: true,
+                        updatedAt: true
+                    }
+                }
             },
             where: {
                 OR: [...(SearchWords.map(w => (
@@ -81,7 +107,7 @@ export async function searchProductsAction(searchWord: string, pagination: Pagin
             },
             take: count,
             skip,
-        }) as ProductInterface[]
+        }) as GetProductDataResponse[]
 
         return {
             success: true,

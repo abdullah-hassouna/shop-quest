@@ -1,79 +1,83 @@
-import React from 'react';
-
 import Link from 'next/link';
-import { ShoppingCart } from 'lucide-react';
+import { Star } from 'lucide-react';
 import { Button } from './ui/button';
-import useCartStore from '@/store/cart-store';
+import { GetProductDataResponse } from '@/types/get-data-response';
+import useCartStore, { CartItem } from '@/store/cart-store';
 import { toast } from 'sonner';
-import { ProductInterface } from '@/types/product-type';
-import { useRouter } from 'next/navigation';
-import { Badge } from './ui/badge';
 
-const ProductCard = ({ product }: { product: ProductInterface }) => {
-    const { addToCart } = useCartStore((state) => state);
-    const { push } = useRouter()
-
-    const redirectToProduct = () => { push(`/product/${product.id}`) }
-
-    const handleAddToCart = (event: any, product: ProductInterface) => {
-        event.stopPropagation();
-        addToCart({
-            id: product.id,
-            name: product.name || 'Product',
-            price: product.price || 0,
-            quantity: 1,
-            image: product.imagesId[0]?.url || "https://example.com/mouse2.jpg",
-        });
-        toast('Added to Cart', {
-            description: `${product.name} has been added to your cart.`,
-            duration: 5000,
-        });
+export default function ProductCard({ product }: { product: GetProductDataResponse }) {
+  toast
+  const handleAddToCart = () => {
+    const cartItem: CartItem = {
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      quantity: 1,
+      image: product.imagesId ? product.imagesId[0].url : '',
     };
-    return (
-        <div className='py-4 px-2'>
-            <div onClick={redirectToProduct} className='group cursor-pointer relative overflow-hidden h-full flex flex-col rounded-lg shadow-lg border-2 border-gray-200 bg-white'>
-                <div className='relative w-full pt-[60%] bg-transparent'
-                >
-                    <img
-                        src={product.imagesId[0].url || "https://example.com/mouse2.jpg"}
-                        alt={product.imagesId[0].alt || 'Product Image'}
-                        className='
-            absolute inset-0 w-full h-full object-contain transition-transform duration-300 group-hover:scale-105 border-b-2 border-gray-200'
-                    />
-                </div>
-                <div className='p-4 flex-grow'>
-                    <Link href={`/product/${product.id}`}>
-                        <h3 className='text-xl mb-2 text-gray-700 group-hover:text-purple-500 transition-colors duration-300 line-clamp-1'>
-                            {product.name}
-                        </h3>
-                    </Link>
-                    <div
-                        className='text-gray-500 line-clamp-1 text-sm mb-2'
-                        dangerouslySetInnerHTML={{
-                            __html: product.description || '',
-                        }}
-                    />
+    useCartStore.getState().addToCart(cartItem);
+    toast.success(`${product.name} added to cart!`);
+  }
 
-                    <div className='flex flex-wrap gap-2 capitalize mb-2'>
-                        {product?.tags?.length ? product.tags?.slice(0, 5).map((tag, index) => <Badge className='capitalize' key={index}>{tag.name}</Badge>) : <span className='text-gray-400'>No Tags</span>}
-                    </div>
-                    <p className='text-gray-600'>
-                        ${product.price.toFixed(2)}
-                    </p>
-                </div>
-                <div className='p-4'>
-                    <Button
-                        className='w-full bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 hover:from-purple-600 hover:via-pink-600 hover:to-red-600 text-white font-semibold cursor-pointer'
-                        onClick={(e) => handleAddToCart(e, product)}
-                    >
-                        <ShoppingCart className='w-5 h-5 mr-2' />
-                        Add to Cart
-                    </Button>
-                    <div className='absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 hover:from-purple-600 hover:via-pink-600 hover:to-red-600 text-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300'></div>
-                </div>
-            </div>
+  const reviews = product?.Review || [];
+  let averageRating = 0;
+
+  if (reviews.length === 0) {
+  } else {
+    const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+    averageRating = totalRating / reviews.length;
+  }
+
+
+
+  return (
+    <div className="group relative">
+      <div className="w-full min-h-80 bg-gray-200 aspect-w-1 aspect-h-1 rounded-md overflow-hidden group-hover:opacity-75 lg:h-80 lg:aspect-none">
+        <img
+          src={product.imagesId ? product.imagesId[0].url : ""}
+          alt={product.imagesId ? product.imagesId[0].alt : ""}
+          className="w-full h-full object-center object-cover lg:w-full lg:h-full"
+        />
+      </div>
+      <div className="mt-4 flex justify-between">
+        <div>
+          <h3 className="text-sm text-gray-700">
+            <Link href={`/product/${product.id}`}>
+              <span aria-hidden="true" className="absolute inset-0" />
+              {product.name}
+            </Link>
+          </h3>
+          <div className="mt-1 flex items-center">
+            {[...Array(averageRating)].map((_, i) => (
+              <Star
+                key={i}
+                className={`h-5 w-5 text-yellow-400 fill-yellow-400`}
+              />
+            ))}
+
+            {[...Array(5 - averageRating)].map((_, i) => (
+              <Star
+                key={i}
+                className={`h-5 w-5 text-yellow-400`}
+              />
+            ))}
+            <span className="ml-2 text-sm text-gray-500">
+              ({product.Review?.length})
+            </span>
+          </div>
         </div>
-    );
-};
-
-export default ProductCard;
+        <p className="text-sm font-medium text-gray-900">
+          {product.price && (
+            <span className="line-through text-gray-500 mr-2">
+              ${product.price.toFixed(2)}
+            </span>
+          )}
+          ${product.price.toFixed(2)}
+        </p>
+      </div>
+      <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+        <Button onClick={handleAddToCart} size="sm">Add to Cart</Button>
+      </div>
+    </div>
+  );
+}

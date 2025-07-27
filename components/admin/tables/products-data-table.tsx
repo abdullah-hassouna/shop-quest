@@ -13,7 +13,7 @@ import Link from 'next/link';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { EnhancedDataTableProps, OrderBy } from '@/types/general';
 import { HeaderCell } from './HeaderTable';
-import ProductDataOprions from '../dialogs/ProductDataOptions';
+import ProductDataOptions from '../dialogs/ProductDataOptions';
 
 export function ProductsDataTable({
     data: initialData,
@@ -81,7 +81,7 @@ export function ProductsDataTable({
             accessorKey: 'actions',
             header: () => <>Actions</>,
             cell: ({ row }: { row: any }) => (
-                <ProductDataOprions row={row} />
+                <ProductDataOptions row={row} />
             )
         }
     ];

@@ -13,7 +13,7 @@ function ProductDataOptions({ row }: { row: any }) {
         name: row.getValue("name"),
         description: row.getValue("description"),
         price: row.getValue("price"),
-        category: row.getValue("category").name,
+        category: row.getValue("category"),
         images: row.getValue("imagesId"),
         tags:  row.getValue("tags")
     }

@@ -105,7 +105,7 @@ const SignUpForm = ({ toggleForm, routerHook }: { toggleForm: MouseEventHandler<
                     </div>
                     <Button
                         type='submit'
-                        className='w-full bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 hover:from-purple-600 hover:via-pink-600 hover:to-red-600 text-white text-base sm:text-xl font-bold p-4 sm:p-6 rounded-md shadow-xl transition-colors duration-300 ease-in-out cursor-pointer'
+                        className='w-full bg-primary  text-white text-base sm:text-xl font-bold p-4 sm:p-6 rounded-md shadow-xl transition-colors duration-300 ease-in-out cursor-pointer'
                         disabled={isSubmitting}
                     >
                         {isSubmitting ? (
@@ -119,7 +119,6 @@ const SignUpForm = ({ toggleForm, routerHook }: { toggleForm: MouseEventHandler<
                             Already a member?
                         </p>
                         <span
-                            // variant='link'
                             className='text-base sm:text-lg lg:text-xl mx-2 text-gray-500 cursor-pointer'
                             onClick={toggleForm}
                         >

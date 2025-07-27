@@ -32,6 +32,8 @@ model User {
   rooms          Room[]         @relation("RoomUsers")
   roomId         String?
   Message        Message[]
+
+  Review Review[]
 }
 
 model Account {
@@ -101,6 +103,8 @@ model Product {
   orders      OrderItem[]
   tags        Tag[]       @relation("ProductTags")
   createdAt   DateTime    @default(now())
+
+  Review Review[]
 }
 
 model Order {
@@ -197,4 +201,16 @@ model Anoouncement {
   type      AnoouncementType
   createdAt DateTime         @default(now())
   updatedAt DateTime         @updatedAt
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  rating    Int
+  comment   String?
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  product   Product  @relation(fields: [productId], references: [id])
+  productId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

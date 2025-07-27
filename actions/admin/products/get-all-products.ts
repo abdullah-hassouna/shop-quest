@@ -76,6 +76,7 @@ export const getAllProducts = cache(async (page: string | number, take: number =
                         name: true,
                         color: true,
                         icon: true,
+                        slug: true
                     }
                 },
                 tags: {

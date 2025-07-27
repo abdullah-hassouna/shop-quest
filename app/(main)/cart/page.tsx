@@ -10,6 +10,7 @@ import {
   Minus,
   CreditCard,
   LogIn,
+  ArrowLeft,
 } from 'lucide-react';
 import { redirect, useRouter } from 'next/navigation';
 import useCartStore from '@/store/cart-store';
@@ -59,77 +60,80 @@ export default function CartPage() {
   };
 
   return (
-    <div className='min-h-screen  p-4 sm:p-8'>
-      <div className='max-w-4xl mx-auto'>
-        <h1 className='text-3xl sm:text-4xl font-bold text-center mb-8 sm:mb-12 bg-gradient-to-r from-purple-600 via-pink-500 to-red-500 bg-clip-text text-transparent'>
-          Your Cart
-        </h1>
+    <div className="min-h-screen bg-gray-50">
 
-        {isLoading ? (
-          <div className='flex justify-center items-center h-64'>
-            <div className='animate-spin rounded-full h-10 w-10 border-b-2 border-purple-900'></div>
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <Button
+          variant="ghost"
+          className="mb-6 text-primary hover:text-red-600 hover:bg-red-50"
+          onClick={() => router.back()}
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Continue Shopping
+        </Button>
+
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">Shopping Cart</h1>
+
+        {cartItems.length === 0 ? (
+          <div className="text-center py-16">
+            <ShoppingCart className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+            <h2 className="text-2xl font-semibold text-gray-900 mb-2">Your cart is empty</h2>
+            <p className="text-gray-600 mb-6">Looks like you haven't added any items to your cart yet.</p>
+            <Button onClick={() => router.push("/")} className="bg-primary hover:bg-red-600 text-white">
+              Continue Shopping
+            </Button>
           </div>
         ) : (
-          <>
-            <div>
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Cart Items */}
+            <div className="lg:col-span-2 space-y-4">
               {cartItems.map((item) => (
-                <div
-                  key={item.id}
-                  className=' p-4 sm:p-6 rounded-lg shadow-lg mb-4 relative overflow-hidden border-2 border-gray-200'
-                >
-                  <div className='flex flex-col sm:flex-row sm:items-center sm:space-x-4'>
-                    <div className='flex items-center space-x-4 mb-4 sm:mb-0'>
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className='w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-md'
-                      />
-                      <div className='flex-1'>
-                        <h3 className='text-lg font-semibold bg-gradient-to-r from-purple-600 via-pink-500 to-red-500 bg-clip-text text-transparent line-clamp-1'>
-                          {item.name}
-                        </h3>
-                        <p className='text-gray-400'>
-                          ${item?.price?.toFixed(2)}
-                        </p>
-                      </div>
+                <div key={item.id} className="bg-white p-6 rounded-lg shadow-sm border">
+                  <div className="flex items-center space-x-4">
+                    <img
+                      src={item.image || "/placeholder.svg"}
+                      alt={item.name}
+                      className="w-20 h-20 object-cover rounded-md"
+                    />
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-gray-900">{item.name}</h3>
+                      <p className="text-primary font-medium">${item.price.toFixed(2)}</p>
                     </div>
-                    <div className='flex items-center justify-between sm:justify-end sm:flex-1'>
-                      <div className='flex items-center space-x-2'>
-                        <Button
-                          size='icon'
-                          onClick={() =>
-                            updateQuantity(item.id, item.quantity - 1)
-                          }
-                          className='bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 hover:from-purple-600 hover:via-pink-600 hover:to-red-600 text-white cursor-pointer'
-                        >
-                          <Minus className='h-4 w-4' />
-                        </Button>
-                        <Input
-                          type='number'
-                          min='0'
-                          value={item.quantity}
-                          onChange={(e) =>
-                            updateQuantity(item.id, parseInt(e.target.value))
-                          }
-                          className='w-16  border-gray-600 text-center bg-gradient-to-r from-purple-600 via-pink-500 to-red-500 bg-clip-text text-transparent'
-                        />
-                        <Button
-                          size='icon'
-                          onClick={() =>
-                            updateQuantity(item.id, item.quantity + 1)
-                          }
-                          className='bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 hover:from-purple-600 hover:via-pink-600 hover:to-red-600 text-white cursor-pointer'
-                        >
-                          <Plus className='h-4 w-4' />
-                        </Button>
-                      </div>
+                    <div className="flex items-center space-x-3">
                       <Button
-                        variant='ghost'
-                        size='icon'
-                        onClick={() => removeItem(item.id)}
-                        className='text-red-500 hover:text-red-600 hover:bg-red-100 rounded-full transition-colors duration-200 ml-4 cursor-pointer'
+                        variant="outline"
+                        size="icon"
+                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        className="h-8 w-8"
                       >
-                        <Trash2 className='h-5 w-5' />
+                        <Minus className="h-4 w-4" />
+                      </Button>
+                      <Input
+                        type="number"
+                        min="1"
+                        value={item.quantity}
+                        onChange={(e) => updateQuantity(item.id, Number.parseInt(e.target.value) || 1)}
+                        className="w-16 text-center"
+                      />
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        className="h-8 w-8"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-lg font-semibold text-gray-900">${(item.price * item.quantity).toFixed(2)}</p>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeItem(item.id)}
+                        className="text-primary hover:text-red-600 hover:bg-red-50 mt-2"
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Remove
                       </Button>
                     </div>
                   </div>
@@ -137,67 +141,51 @@ export default function CartPage() {
               ))}
             </div>
 
-            <div className='p-4 sm:p-6 rounded-lg border-gray-200 border-2 shadow-lg mt-8'>
-              <h2 className='text-xl sm:text-2xl font-semibold mb-4 bg-gradient-to-r from-purple-600 via-pink-500 to-red-500 bg-clip-text text-transparent'>
-                Order Summary
-              </h2>
-              <div className='space-y-2'>
-                <div className='flex justify-between'>
-                  <span>Subtotal</span>
-                  <span>${subtotal.toFixed(2)}</span>
+            {/* Order Summary */}
+            <div className="lg:col-span-1">
+              <div className="bg-white p-6 rounded-lg shadow-sm border sticky top-24">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">Order Summary</h2>
+
+                <div className="space-y-3 mb-4">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Subtotal</span>
+                    <span className="font-medium">${subtotal.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Tax</span>
+                    <span className="font-medium">${tax.toFixed(2)}</span>
+                  </div>
+                  <div className="border-t pt-3">
+                    <div className="flex justify-between">
+                      <span className="text-lg font-semibold">Total</span>
+                      <span className="text-lg font-semibold text-primary">${total.toFixed(2)}</span>
+                    </div>
+                  </div>
                 </div>
-                <div className='flex justify-between'>
-                  <span>Tax</span>
-                  <span>${tax.toFixed(2)}</span>
-                </div>
-                <div className='border-t border-gray-700 my-2'></div>
-                <div className='flex justify-between text-lg font-semibold'>
-                  <span>Total</span>
-                  <span className='bg-gradient-to-r from-purple-600 via-pink-500 to-red-500 bg-clip-text text-transparent'>
-                    ${total.toFixed(2)}
-                  </span>
+
+                {subtotal < 50 && (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3 mb-4">
+                    <p className="text-sm text-yellow-800">Add ${(50 - subtotal).toFixed(2)} more for free shipping!</p>
+                  </div>
+                )}
+
+                <Button
+                  onClick={createOrderAndCheckout}
+                  disabled={isLoading}
+                  className="w-full bg-primary hover:bg-red-600 text-white h-12"
+                >
+                  <CreditCard className="mr-2 h-5 w-5" />
+                  {isLoading ? "Processing..." : "Proceed to Checkout"}
+                </Button>
+
+                <div className="mt-4 text-center">
+                  <p className="text-sm text-gray-600">Secure checkout powered by SSL encryption</p>
                 </div>
               </div>
-              {user ? (
-                <Button
-                  className='w-full mt-6 bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 hover:from-purple-600 hover:via-pink-600 hover:to-red-600 text-white font-semibold cursor-pointer'
-                  disabled={!cartItems.length}
-                  onClick={createOrderAndCheckout}
-                >
-                  <CreditCard className='mr-2 h-5 w-5' />
-                  Proceed to Checkout
-                </Button>
-              ) : (
-                <Button
-                  className='w-full mt-6 bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 hover:from-purple-600 hover:via-pink-600 hover:to-red-600 text-white font-semibold cursor-pointer'
-                  onClick={() => router.push('/auth?type=login')}
-                >
-                  <LogIn className='mr-2 h-5 w-5' />
-                  Login to Checkout
-                </Button>
-              )}
             </div>
-          </>
-        )}
-
-        {!isLoading && cartItems.length === 0 && (
-          <div className='text-center py-12'>
-            <ShoppingCart className='mx-auto h-16 w-16 text-gray-400 mb-4' />
-            <h2 className='text-2xl font-semibold mb-2 bg-gradient-to-r from-purple-600 via-pink-500 to-red-500 bg-clip-text text-transparent'>
-              Your cart is empty
-            </h2>
-            <p className='text-gray-400 mb-6'>
-              Looks like you haven&apos;t added any items to your cart yet.
-            </p>
-            <Button
-              className='bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 hover:from-purple-600 hover:via-pink-600 hover:to-red-600 text-white font-semibold cursor-pointer'
-              onClick={() => router.push('/')}
-            >
-              Continue Shopping
-            </Button>
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }

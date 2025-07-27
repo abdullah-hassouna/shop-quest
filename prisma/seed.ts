@@ -1,739 +1,641 @@
-import { PrismaClient } from '@prisma/client'
-import { faker } from '@faker-js/faker'
+import { PrismaClient } from '@prisma/client';
+
 import bcrypt from 'bcryptjs';
-const prisma = new PrismaClient()
 
-// Helper to generate Placeholder API URLs based on a keyword
-// const placeholderImage = (keyword: string, i: number) => `https://placehold.co/600x600?text=${encodeURIComponent(keyword)}+${i + 1}`;
+const prisma = new PrismaClient();
 
-// Helper to generate Pexels image URLs based on a keyword
-const placeholderImage = (keyword: string, i: number) => `https://images.pexels.com/photos/${1000000 + (i * 10)}/pexels-photo-${1000000 + (i * 10)}.jpeg?auto=compress&w=600&q=80&fit=crop&h=600&text=${encodeURIComponent(keyword)}`;
+async function main() {
+    console.log('🌱 Starting database seeding...');
 
-// Helper to get tag connectOrCreate array
-const getTagConnect = (tagNames: string[]) => tagNames.map((name: string) => ({
-    where: { name },
-    create: { name },
-}));
-
-// 1. Clear all data before seeding (safe for dev)
-async function clearAllData() {
+    // Clean existing data (optional - comment out if you want to preserve existing data)
+    await prisma.review.deleteMany();
+    await prisma.message.deleteMany();
+    await prisma.room.deleteMany();
+    await prisma.anoouncement.deleteMany();
+    await prisma.oTP.deleteMany();
     await prisma.notification.deleteMany();
     await prisma.orderItem.deleteMany();
     await prisma.order.deleteMany();
-    await prisma.product.deleteMany();
     await prisma.image.deleteMany();
-    await prisma.category.deleteMany();
+    await prisma.product.deleteMany();
     await prisma.tag.deleteMany();
+    await prisma.category.deleteMany();
     await prisma.session.deleteMany();
     await prisma.account.deleteMany();
-    await prisma.verificationToken.deleteMany();
     await prisma.user.deleteMany();
-}
+    await prisma.settings.deleteMany();
 
-async function main() {
-    await clearAllData();
+    // Hash password for users
+    const hashedPassword = await bcrypt.hash('password123', 12);
 
-    const electronics = await prisma.category.upsert({
-        where: { slug: 'electronics' },
-        update: {},
-        create: {
-            name: 'Electronics',
-            slug: 'electronics',
-            description: 'Electronic gadgets and devices',
-            icon: 'https://example.com/electronics-icon.png',
-            color: '#1e90ff',
-        },
-    });
-    const fashion = await prisma.category.upsert({
-        where: { slug: 'fashion' },
-        update: {},
-        create: {
-            name: 'Fashion',
-            slug: 'fashion',
-            description: 'Clothing and accessories',
-            icon: 'https://example.com/fashion-icon.png',
-            color: '#e75480',
-        },
+    // Create Settings
+    const settings = await prisma.settings.create({
+        data: {
+            title: 'ShopQuest Marketplace',
+            slug: 'shopquest-marketplace',
+            metadata: JSON.stringify({
+                description: 'Your favorite online marketplace',
+                keywords: 'shop, marketplace, products'
+            }),
+            links: JSON.stringify({
+                facebook: 'https://facebook.com/shopquest',
+                twitter: 'https://twitter.com/shopquest',
+                instagram: 'https://instagram.com/shopquest'
+            }),
+            logoDark: 'https://example.com/logo-dark.png',
+            logoLight: 'https://example.com/logo-light.png',
+            favicon: 'https://example.com/favicon.ico'
+        }
     });
 
-    const alicePassword = await bcrypt.hash('alicepassword', 10);
-    const alice = await prisma.user.upsert({
-        where: { email: 'alice@prisma.io' },
-        update: {},
-        create: {
-            email: 'alice@prisma.io',
-            name: 'Alice',
-            role: 'ADMIN',
-            hashedPassword: alicePassword,
-        },
+    // Create Users
+    const users = await Promise.all([
+        prisma.user.create({
+            data: {
+                name: 'John Admin',
+                email: 'admin@shopquest.com',
+                hashedPassword,
+                role: 'ADMIN',
+                image: 'https://i.pravatar.cc/150?img=1'
+            }
+        }),
+        prisma.user.create({
+            data: {
+                name: 'Alice Smith',
+                email: 'alice@example.com',
+                hashedPassword,
+                role: 'USER',
+                image: 'https://i.pravatar.cc/150?img=2'
+            }
+        }),
+        prisma.user.create({
+            data: {
+                name: 'Bob Johnson',
+                email: 'bob@example.com',
+                hashedPassword,
+                role: 'USER',
+                image: 'https://i.pravatar.cc/150?img=3'
+            }
+        }),
+        prisma.user.create({
+            data: {
+                name: 'Carol Davis',
+                email: 'carol@example.com',
+                hashedPassword,
+                role: 'USER',
+                image: 'https://i.pravatar.cc/150?img=4'
+            }
+        }),
+        prisma.user.create({
+            data: {
+                name: 'David Wilson',
+                email: 'david@example.com',
+                hashedPassword,
+                role: 'USER',
+                image: 'https://i.pravatar.cc/150?img=5'
+            }
+        })
+    ]);
+
+    console.log(`✅ Created ${users.length} users`);
+
+    // Create Categories
+    const categories = await Promise.all([
+        prisma.category.create({
+            data: {
+                name: 'Electronics',
+                description: 'Computers, phones, and electronic gadgets',
+                icon: 'https://example.com/icons/electronics.png',
+                color: '#3B82F6',
+                slug: 'electronics'
+            }
+        }),
+        prisma.category.create({
+            data: {
+                name: 'Clothing',
+                description: 'Fashion and apparel for all ages',
+                icon: 'https://example.com/icons/clothing.png',
+                color: '#EC4899',
+                slug: 'clothing'
+            }
+        }),
+        prisma.category.create({
+            data: {
+                name: 'Home & Garden',
+                description: 'Furniture, decor, and garden supplies',
+                icon: 'https://example.com/icons/home.png',
+                color: '#10B981',
+                slug: 'home-garden'
+            }
+        }),
+        prisma.category.create({
+            data: {
+                name: 'Sports & Outdoors',
+                description: 'Sports equipment and outdoor gear',
+                icon: 'https://example.com/icons/sports.png',
+                color: '#F59E0B',
+                slug: 'sports-outdoors'
+            }
+        }),
+        prisma.category.create({
+            data: {
+                name: 'Books',
+                description: 'Books, magazines, and educational materials',
+                icon: 'https://example.com/icons/books.png',
+                color: '#8B5CF6',
+                slug: 'books'
+            }
+        })
+    ]);
+
+    console.log(`✅ Created ${categories.length} categories`);
+
+    // Create Tags
+    const tags = await Promise.all([
+        prisma.tag.create({ data: { name: 'Popular' } }),
+        prisma.tag.create({ data: { name: 'New Arrival' } }),
+        prisma.tag.create({ data: { name: 'Sale' } }),
+        prisma.tag.create({ data: { name: 'Featured' } }),
+        prisma.tag.create({ data: { name: 'Limited Edition' } }),
+        prisma.tag.create({ data: { name: 'Best Seller' } }),
+        prisma.tag.create({ data: { name: 'Eco-Friendly' } })
+    ]);
+
+    console.log(`✅ Created ${tags.length} tags`);
+
+    // Create Products with Images
+    const products = [];
+
+    // Electronics Products
+    const laptop = await prisma.product.create({
+        data: {
+            name: 'MacBook Pro 16-inch',
+            price: 2499.99,
+            description: 'Powerful laptop with M2 Pro chip, perfect for professionals and creators.',
+            sellerId: users[1].id, // Alice
+            categoryId: categories[0].id, // Electronics
+            tags: {
+                connect: [
+                    { id: tags[0].id }, // Popular
+                    { id: tags[5].id }  // Best Seller
+                ]
+            }
+        }
+    });
+    products.push(laptop);
+
+    await prisma.image.createMany({
+        data: [
+            { url: 'https://picsum.photos/800/600?random=1', alt: 'MacBook Pro front view', productId: laptop.id },
+            { url: 'https://picsum.photos/800/600?random=2', alt: 'MacBook Pro side view', productId: laptop.id },
+            { url: 'https://picsum.photos/800/600?random=3', alt: 'MacBook Pro keyboard detail', productId: laptop.id }
+        ]
     });
 
-    // Create 5 buyers with unique emails and names
-    const buyerInfos = [
-        { email: 'buyer1@prisma.io', name: 'Buyer One' },
-        { email: 'buyer2@prisma.io', name: 'Buyer Two' },
-        { email: 'buyer3@prisma.io', name: 'Buyer Three' },
-        { email: 'buyer4@prisma.io', name: 'Buyer Four' },
-        { email: 'buyer5@prisma.io', name: 'Buyer Five' },
-    ];
-    const buyerPasswords = await Promise.all(
-        buyerInfos.map((_, i) => bcrypt.hash(`buyer${i + 1}password`, 10))
-    );
-    const buyers = [];
-    for (let i = 0; i < buyerInfos.length; i++) {
-        buyers.push(
-            await prisma.user.upsert({
-                where: { email: buyerInfos[i].email },
-                update: {},
-                create: {
-                    email: buyerInfos[i].email,
-                    name: buyerInfos[i].name,
-                    role: 'BUYER',
-                    hashedPassword: buyerPasswords[i],
-                },
-            })
-        );
-    }
-    const bobPassword = await bcrypt.hash('bobpassword', 10);
-    const bob = await prisma.user.upsert({
-        where: { email: 'bob@prisma.io' },
-        update: {},
-        create: {
-            email: 'bob@prisma.io',
-            name: 'Bob',
-            role: 'BUYER',
-            hashedPassword: bobPassword,
-        },
+    const smartphone = await prisma.product.create({
+        data: {
+            name: 'iPhone 15 Pro',
+            price: 1199.99,
+            description: 'Latest iPhone with titanium design and advanced camera system.',
+            sellerId: users[2].id, // Bob
+            categoryId: categories[0].id, // Electronics
+            tags: {
+                connect: [
+                    { id: tags[1].id }, // New Arrival
+                    { id: tags[0].id }  // Popular
+                ]
+            }
+        }
+    });
+    products.push(smartphone);
+
+    await prisma.image.createMany({
+        data: [
+            { url: 'https://picsum.photos/800/600?random=4', alt: 'iPhone 15 Pro front view', productId: smartphone.id },
+            { url: 'https://picsum.photos/800/600?random=5', alt: 'iPhone 15 Pro back view', productId: smartphone.id }
+        ]
     });
 
-    // --- Room Seeding Logic ---
-    // Get all users
-    const allUsers = await prisma.user.findMany();
-    // Find admin
-    const admin = allUsers.find(u => u.role === 'ADMIN');
-    if (!admin) throw new Error('No admin user found');
-    // Create public room for all users (including admin)
-    await prisma.room.create({
+    const headphones = await prisma.product.create({
+        data: {
+            name: 'Sony WH-1000XM5 Headphones',
+            price: 399.99,
+            description: 'Premium noise-canceling wireless headphones with exceptional sound quality.',
+            sellerId: users[3].id, // Carol
+            categoryId: categories[0].id, // Electronics
+            tags: {
+                connect: [
+                    { id: tags[2].id }, // Sale
+                    { id: tags[5].id }  // Best Seller
+                ]
+            }
+        }
+    });
+    products.push(headphones);
+
+    await prisma.image.createMany({
+        data: [
+            { url: 'https://picsum.photos/800/600?random=6', alt: 'Sony headphones main view', productId: headphones.id },
+            { url: 'https://picsum.photos/800/600?random=7', alt: 'Sony headphones detail', productId: headphones.id }
+        ]
+    });
+
+    // Clothing Products
+    const jacket = await prisma.product.create({
+        data: {
+            name: 'Premium Leather Jacket',
+            price: 299.99,
+            description: 'Genuine leather jacket with modern cut and premium finish.',
+            sellerId: users[1].id, // Alice
+            categoryId: categories[1].id, // Clothing
+            tags: {
+                connect: [
+                    { id: tags[3].id }, // Featured
+                    { id: tags[4].id }  // Limited Edition
+                ]
+            }
+        }
+    });
+    products.push(jacket);
+
+    await prisma.image.createMany({
+        data: [
+            { url: 'https://picsum.photos/800/600?random=8', alt: 'Leather jacket front view', productId: jacket.id },
+            { url: 'https://picsum.photos/800/600?random=9', alt: 'Leather jacket back view', productId: jacket.id },
+            { url: 'https://picsum.photos/800/600?random=10', alt: 'Leather jacket detail', productId: jacket.id }
+        ]
+    });
+
+    const sneakers = await prisma.product.create({
+        data: {
+            name: 'Nike Air Max 270',
+            price: 149.99,
+            description: 'Comfortable running shoes with Air Max technology and stylish design.',
+            sellerId: users[4].id, // David
+            categoryId: categories[1].id, // Clothing
+            tags: {
+                connect: [
+                    { id: tags[0].id }, // Popular
+                    { id: tags[2].id }  // Sale
+                ]
+            }
+        }
+    });
+    products.push(sneakers);
+
+    await prisma.image.createMany({
+        data: [
+            { url: 'https://picsum.photos/800/600?random=11', alt: 'Nike sneakers side view', productId: sneakers.id },
+            { url: 'https://picsum.photos/800/600?random=12', alt: 'Nike sneakers top view', productId: sneakers.id }
+        ]
+    });
+
+    // Home & Garden Products
+    const sofa = await prisma.product.create({
+        data: {
+            name: 'Modern 3-Seat Sofa',
+            price: 899.99,
+            description: 'Comfortable modern sofa with premium fabric upholstery, perfect for any living room.',
+            sellerId: users[2].id, // Bob
+            categoryId: categories[2].id, // Home & Garden
+            tags: {
+                connect: [
+                    { id: tags[3].id }, // Featured
+                    { id: tags[6].id }  // Eco-Friendly
+                ]
+            }
+        }
+    });
+    products.push(sofa);
+
+    await prisma.image.createMany({
+        data: [
+            { url: 'https://picsum.photos/800/600?random=13', alt: 'Modern sofa front view', productId: sofa.id },
+            { url: 'https://picsum.photos/800/600?random=14', alt: 'Modern sofa angle view', productId: sofa.id }
+        ]
+    });
+
+    const plantPot = await prisma.product.create({
+        data: {
+            name: 'Ceramic Plant Pot Set',
+            price: 49.99,
+            description: 'Set of 3 elegant ceramic plant pots in different sizes, perfect for indoor plants.',
+            sellerId: users[3].id, // Carol
+            categoryId: categories[2].id, // Home & Garden
+            tags: {
+                connect: [
+                    { id: tags[6].id }, // Eco-Friendly
+                    { id: tags[1].id }  // New Arrival
+                ]
+            }
+        }
+    });
+    products.push(plantPot);
+
+    await prisma.image.createMany({
+        data: [
+            { url: 'https://picsum.photos/800/600?random=15', alt: 'Ceramic plant pot set', productId: plantPot.id },
+            { url: 'https://picsum.photos/800/600?random=16', alt: 'Plant pot detail view', productId: plantPot.id }
+        ]
+    });
+
+    // Sports & Outdoors Products
+    const bicycle = await prisma.product.create({
+        data: {
+            name: 'Mountain Bike Pro',
+            price: 1299.99,
+            description: 'Professional mountain bike with 21-speed transmission and durable aluminum frame.',
+            sellerId: users[4].id, // David
+            categoryId: categories[3].id, // Sports & Outdoors
+            tags: {
+                connect: [
+                    { id: tags[3].id }, // Featured
+                    { id: tags[5].id }  // Best Seller
+                ]
+            }
+        }
+    });
+    products.push(bicycle);
+
+    await prisma.image.createMany({
+        data: [
+            { url: 'https://picsum.photos/800/600?random=17', alt: 'Mountain bike side view', productId: bicycle.id },
+            { url: 'https://picsum.photos/800/600?random=18', alt: 'Mountain bike wheel detail', productId: bicycle.id },
+            { url: 'https://picsum.photos/800/600?random=19', alt: 'Mountain bike gear system', productId: bicycle.id }
+        ]
+    });
+
+    const tent = await prisma.product.create({
+        data: {
+            name: '4-Person Camping Tent',
+            price: 199.99,
+            description: 'Waterproof camping tent for 4 people with easy setup and excellent ventilation.',
+            sellerId: users[1].id, // Alice
+            categoryId: categories[3].id, // Sports & Outdoors
+            tags: {
+                connect: [
+                    { id: tags[2].id }, // Sale
+                    { id: tags[0].id }  // Popular
+                ]
+            }
+        }
+    });
+    products.push(tent);
+
+    await prisma.image.createMany({
+        data: [
+            { url: 'https://picsum.photos/800/600?random=20', alt: 'Camping tent exterior', productId: tent.id },
+            { url: 'https://picsum.photos/800/600?random=21', alt: 'Camping tent interior', productId: tent.id }
+        ]
+    });
+
+    // Books Products
+    const cookbook = await prisma.product.create({
+        data: {
+            name: 'Master Chef Cookbook',
+            price: 29.99,
+            description: 'Comprehensive cookbook with over 200 professional recipes and cooking techniques.',
+            sellerId: users[2].id, // Bob
+            categoryId: categories[4].id, // Books
+            tags: {
+                connect: [
+                    { id: tags[5].id }, // Best Seller
+                    { id: tags[1].id }  // New Arrival
+                ]
+            }
+        }
+    });
+    products.push(cookbook);
+
+    await prisma.image.createMany({
+        data: [
+            { url: 'https://picsum.photos/800/600?random=22', alt: 'Cookbook cover', productId: cookbook.id },
+            { url: 'https://picsum.photos/800/600?random=23', alt: 'Cookbook inside pages', productId: cookbook.id }
+        ]
+    });
+
+    console.log(`✅ Created ${products.length} products with images`);
+
+    // Create Orders
+    const orders = await Promise.all([
+        prisma.order.create({
+            data: {
+                buyerId: users[1].id, // Alice
+                total: 1799.98,
+                status: 'DELIVERED',
+                items: {
+                    create: [
+                        { productId: smartphone.id, quantity: 1, price: smartphone.price },
+                        { productId: headphones.id, quantity: 1, price: headphones.price }
+                    ]
+                }
+            }
+        }),
+        prisma.order.create({
+            data: {
+                buyerId: users[3].id, // Carol
+                total: 449.98,
+                status: 'SHIPPED',
+                items: {
+                    create: [
+                        { productId: sneakers.id, quantity: 2, price: sneakers.price },
+                        { productId: sneakers.id, quantity: 1, price: sneakers.price }
+                    ]
+                }
+            }
+        }),
+        prisma.order.create({
+            data: {
+                buyerId: users[4].id, // David
+                total: 2799.98,
+                status: 'PENDING',
+                items: {
+                    create: [
+                        { productId: laptop.id, quantity: 1, price: laptop.price },
+                        { productId: jacket.id, quantity: 1, price: jacket.price }
+                    ]
+                }
+            }
+        })
+    ]);
+
+    console.log(`✅ Created ${orders.length} orders`);
+
+    // Create Reviews
+    const reviews = await Promise.all([
+        prisma.review.create({
+            data: {
+                rating: 5,
+                comment: 'Excellent laptop! Super fast and great display quality.',
+                userId: users[3].id, // Carol
+                productId: laptop.id
+            }
+        }),
+        prisma.review.create({
+            data: {
+                rating: 4,
+                comment: 'Good phone, but battery could be better.',
+                userId: users[4].id, // David
+                productId: smartphone.id
+            }
+        }),
+        prisma.review.create({
+            data: {
+                rating: 5,
+                comment: 'Best headphones I have ever owned. Amazing noise cancellation!',
+                userId: users[1].id, // Alice
+                productId: headphones.id
+            }
+        }),
+        prisma.review.create({
+            data: {
+                rating: 4,
+                comment: 'Beautiful jacket, great quality leather.',
+                userId: users[2].id, // Bob
+                productId: jacket.id
+            }
+        }),
+        prisma.review.create({
+            data: {
+                rating: 5,
+                comment: 'Very comfortable sneakers, perfect for running.',
+                userId: users[3].id, // Carol
+                productId: sneakers.id
+            }
+        })
+    ]);
+
+    console.log(`✅ Created ${reviews.length} reviews`);
+
+    // Create Notifications
+    const notifications = await Promise.all([
+        prisma.notification.create({
+            data: {
+                userId: users[1].id, // Alice
+                message: 'Your order has been shipped!',
+                read: false
+            }
+        }),
+        prisma.notification.create({
+            data: {
+                userId: users[2].id, // Bob
+                message: 'New review received for your product.',
+                read: true
+            }
+        }),
+        prisma.notification.create({
+            data: {
+                userId: users[3].id, // Carol
+                message: 'Your order has been delivered successfully.',
+                read: false
+            }
+        }),
+        prisma.notification.create({
+            data: {
+                userId: users[4].id, // David
+                message: 'Payment confirmation received.',
+                read: true
+            }
+        })
+    ]);
+
+    console.log(`✅ Created ${notifications.length} notifications`);
+
+    // Create Chat Rooms and Messages
+    const room1 = await prisma.room.create({
         data: {
             users: {
-                connect: allUsers.map(u => ({ id: u.id }))
-            },
-            // Optionally, you can add a field to distinguish public rooms if you add it to the schema
-        }
-    });
-    // Create private room for each user (except admin) with the admin
-    for (const user of allUsers) {
-        if (user.id !== admin.id) {
-            await prisma.room.create({
-                data: {
-                    users: {
-                        connect: [
-                            { id: admin.id },
-                            { id: user.id }
-                        ]
-                    }
-                }
-            });
-        }
-    }
-
-    await prisma.product.create({
-        data: {
-            name: 'Smartphone',
-            price: 699.99,
-            description: 'Latest model smartphone',
-            categoryId: electronics.id,
-            sellerId: alice.id,
-            imagesId: {
-                create: [
-                    { url: 'https://www.pexels.com/photo/person-in-yellow-jacket-taking-photo-in-the-forest-5048613/', alt: 'Smartphone' },
-                ],
-            },
-            tags: {
-                connectOrCreate: getTagConnect(['wireless', 'smart', 'portable'])
+                connect: [
+                    { id: users[1].id }, // Alice
+                    { id: users[2].id }  // Bob
+                ]
             }
-        },
+        }
     });
-    await prisma.product.create({
+
+    const room2 = await prisma.room.create({
         data: {
-            name: 'Designer T-Shirt',
-            price: 49.99,
-            description: 'Trendy designer t-shirt',
-            categoryId: fashion.id,
-            sellerId: bob.id,
-            imagesId: {
-                create: [
-                    { url: 'https://example.com/tshirt.jpg', alt: 'T-Shirt' },
-                ],
-            },
-            tags: {
-                connectOrCreate: getTagConnect(['fashion', 'accessory'])
+            users: {
+                connect: [
+                    { id: users[3].id }, // Carol
+                    { id: users[4].id }  // David
+                ]
             }
-        },
+        }
     });
 
-    // Create tags
-    const tagsData = [
-        { name: 'wireless' },
-        { name: 'fashion' },
-        { name: 'kitchen' },
-        { name: 'smart' },
-        { name: 'portable' },
-        { name: 'eco-friendly' },
-        { name: 'gaming' },
-        { name: 'fitness' },
-        { name: 'beauty' },
-        { name: 'outdoor' },
-        { name: 'car' },
-        { name: 'accessory' },
-    ];
-    for (const tag of tagsData) {
-        await prisma.tag.upsert({
-            where: { name: tag.name },
-            update: {},
-            create: { name: tag.name },
-        });
-    }
-
-    // Update productsData to include tags
-    const productsData = [
-        {
-            name: 'Wireless Headphones',
-            price: 129.99,
-            description: 'Noise-cancelling over-ear headphones',
-            categoryId: electronics.id,
-            sellerId: alice.id,
-            images: Array.from({ length: 5 }, (_, i) => placeholderImage('headphones', i)),
-            tags: ['wireless', 'smart', 'gaming']
-        },
-        {
-            name: 'Smart Watch',
-            price: 199.99,
-            description: 'Fitness tracking smart watch',
-            categoryId: electronics.id,
-            sellerId: bob.id,
-            images: Array.from({ length: 3 }, (_, i) => placeholderImage('smartwatch', i)),
-            tags: ['smart', 'fitness', 'wireless']
-        },
-        {
-            name: 'Bluetooth Speaker',
-            price: 59.99,
-            description: 'Portable Bluetooth speaker',
-            categoryId: electronics.id,
-            sellerId: alice.id,
-            images: [
-                'https://images.pexels.com/photos/1034653/pexels-photo-1034653.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'
-            ],
-            tags: ['portable', 'wireless']
-        },
-        {
-            name: 'Laptop',
-            price: 999.99,
-            description: 'High performance laptop',
-            categoryId: electronics.id,
-            sellerId: bob.id,
-            images: [
-                'https://images.pexels.com/photos/812264/pexels-photo-812264.jpeg'
-            ],
-            tags: ['smart', 'gaming']
-        },
-        {
-            name: 'Tablet',
-            price: 399.99,
-            description: '10-inch Android tablet',
-            categoryId: electronics.id,
-            sellerId: alice.id,
-            images: Array.from({ length: 3 }, (_, i) => placeholderImage('tablet', i)),
-            tags: ['portable', 'smart']
-        },
-        {
-            name: 'Gaming Mouse',
-            price: 49.99,
-            description: 'Ergonomic gaming mouse',
-            categoryId: electronics.id,
-            sellerId: bob.id,
-            images: Array.from({ length: 3 }, (_, i) => placeholderImage('gaming mouse', i)),
-            tags: ['gaming', 'wireless']
-        },
-        {
-            name: 'Leather Jacket',
-            price: 199.99,
-            description: 'Genuine leather jacket',
-            categoryId: fashion.id,
-            sellerId: alice.id,
-            images: [
-                'https://images.pexels.com/photos/1124468/pexels-photo-1124468.jpeg'
-            ],
-            tags: ['fashion', 'accessory']
-        },
-        {
-            name: 'Sneakers',
-            price: 89.99,
-            description: 'Comfortable running sneakers',
-            categoryId: fashion.id,
-            sellerId: bob.id,
-            images: [
-                'https://images.pexels.com/photos/4462782/pexels-photo-4462782.jpeg'
-            ],
-            tags: ['fashion', 'fitness']
-        },
-        {
-            name: 'Backpack',
-            price: 59.99,
-            description: 'Waterproof travel backpack',
-            categoryId: fashion.id,
-            sellerId: alice.id,
-            images: Array.from({ length: 3 }, (_, i) => placeholderImage('backpack', i)),
-            tags: ['fashion', 'outdoor']
-        },
-        {
-            name: 'Sunglasses',
-            price: 29.99,
-            description: 'UV protection sunglasses',
-            categoryId: fashion.id,
-            sellerId: bob.id,
-            images: Array.from({ length: 3 }, (_, i) => placeholderImage('sunglasses', i)),
-            tags: ['fashion', 'accessory']
-        },
-        {
-            name: 'Dress',
-            price: 79.99,
-            description: 'Elegant summer dress',
-            categoryId: fashion.id,
-            sellerId: alice.id,
-            images: [
-                'https://images.pexels.com/photos/2065195/pexels-photo-2065195.jpeg'
-            ],
-            tags: ['fashion']
-        },
-        {
-            name: 'Jeans',
-            price: 59.99,
-            description: 'Slim fit blue jeans',
-            categoryId: fashion.id,
-            sellerId: bob.id,
-            images: Array.from({ length: 3 }, (_, i) => placeholderImage('blue jeans', i)),
-            tags: ['fashion']
-        },
-        {
-            name: 'Handbag',
-            price: 149.99,
-            description: 'Designer leather handbag',
-            categoryId: fashion.id,
-            sellerId: alice.id,
-            images: Array.from({ length: 4 }, (_, i) => placeholderImage('leather handbag', i)),
-            tags: ['fashion', 'accessory']
-        },
-        {
-            name: 'Watch',
-            price: 249.99,
-            description: 'Luxury wrist watch',
-            categoryId: fashion.id,
-            sellerId: bob.id,
-            images: Array.from({ length: 3 }, (_, i) => placeholderImage('luxury watch', i)),
-            tags: ['fashion', 'accessory']
-        },
-        {
-            name: 'Bluetooth Earbuds',
-            price: 79.99,
-            description: 'Wireless Bluetooth earbuds',
-            categoryId: electronics.id,
-            sellerId: alice.id,
-            images: Array.from({ length: 3 }, (_, i) => placeholderImage('bluetooth earbuds', i)),
-            tags: ['wireless', 'smart']
-        },
-        {
-            name: 'Fitness Tracker',
-            price: 59.99,
-            description: 'Waterproof fitness tracker',
-            categoryId: electronics.id,
-            sellerId: bob.id,
-            images: Array.from({ length: 3 }, (_, i) => placeholderImage('fitness tracker', i)),
-            tags: ['fitness', 'smart']
-        },
-        {
-            name: 'Wireless Charger',
-            price: 39.99,
-            description: 'Fast wireless charger',
-            categoryId: electronics.id,
-            sellerId: alice.id,
-            images: Array.from({ length: 3 }, (_, i) => placeholderImage('wireless charger', i)),
-            tags: ['wireless', 'accessory']
-        },
-        {
-            name: 'Graphic T-Shirt',
-            price: 29.99,
-            description: 'Cool graphic t-shirt',
-            categoryId: fashion.id,
-            sellerId: bob.id,
-            images: Array.from({ length: 3 }, (_, i) => placeholderImage('graphic t-shirt', i)),
-            tags: ['fashion']
-        },
-        {
-            name: 'Winter Coat',
-            price: 249.99,
-            description: 'Warm winter coat',
-            categoryId: fashion.id,
-            sellerId: alice.id,
-            images: Array.from({ length: 4 }, (_, i) => placeholderImage('winter coat', i)),
-            tags: ['fashion']
-        },
-        {
-            name: 'Running Shorts',
-            price: 24.99,
-            description: 'Lightweight running shorts',
-            categoryId: fashion.id,
-            sellerId: bob.id,
-            images: Array.from({ length: 3 }, (_, i) => placeholderImage('running shorts', i)),
-            tags: ['fitness', 'fashion']
-        },
-    ];
-
-    for (const product of productsData) {
-        await prisma.product.create({
+    const messages = await Promise.all([
+        prisma.message.create({
             data: {
-                name: product.name,
-                price: product.price,
-                description: product.description,
-                categoryId: product.categoryId,
-                sellerId: product.sellerId,
-                imagesId: {
-                    create: product.images.map((url, i) => ({ url, alt: `${product.name} Image ${i + 1}` })),
-                },
-                tags: {
-                    connectOrCreate: getTagConnect(product.tags || [])
-                }
-            },
-        });
-    }
-
-    const categories = [
-        {
-            name: 'Home & Kitchen',
-            slug: 'home-kitchen',
-            description: 'Home appliances and kitchenware',
-            icon: 'https://ae01.alicdn.com/kf/Sa1b6e2e7e7e24e2e8a7e7e7e7e7e7e7e7/Home-Kitchen-Icon.png',
-            color: '#ffb347',
-        },
-        {
-            name: 'Beauty & Health',
-            slug: 'beauty-health',
-            description: 'Beauty products and health care',
-            icon: 'https://ae01.alicdn.com/kf/Sb2b6e2e7e7e24e2e8a7e7e7e7e7e7e7e7/Beauty-Health-Icon.png',
-            color: '#ff69b4',
-        },
-        {
-            name: 'Toys & Hobbies',
-            slug: 'toys-hobbies',
-            description: 'Toys, games, and hobby items',
-            icon: 'https://ae01.alicdn.com/kf/Sb3b6e2e7e7e24e2e8a7e7e7e7e7e7e7e7/Toys-Hobbies-Icon.png',
-            color: '#87ceeb',
-        },
-        {
-            name: 'Sports & Outdoors',
-            slug: 'sports-outdoors',
-            description: 'Sports equipment and outdoor gear',
-            icon: 'https://ae01.alicdn.com/kf/Sb4b6e2e7e7e24e2e8a7e7e7e7e7e7e7e7/Sports-Outdoors-Icon.png',
-            color: '#32cd32',
-        },
-        {
-            name: 'Automobiles & Motorcycles',
-            slug: 'automobiles-motorcycles',
-            description: 'Car and motorcycle accessories',
-            icon: 'https://ae01.alicdn.com/kf/Sb5b6e2e7e7e24e2e8a7e7e7e7e7e7e7e7/Automobiles-Motorcycles-Icon.png',
-            color: '#ffa500',
-        },
-    ];
-
-    const createdCategories = [];
-    for (const cat of categories) {
-        createdCategories.push(await prisma.category.upsert({
-            where: { slug: cat.slug },
-            update: {},
-            create: cat,
-        }));
-    }
-
-    const homeKitchenProducts = [
-        {
-            name: 'Stainless Steel Electric Kettle',
-            price: 24.99,
-            description: '1.7L Fast Boil Electric Kettle',
-            images: Array.from({ length: 3 }, (_, i) => placeholderImage('kettle kitchen', i)),
-            tags: ['kitchen', 'eco-friendly']
-        },
-        {
-            name: 'Nonstick Frying Pan',
-            price: 18.99,
-            description: '28cm Nonstick Skillet with Lid',
-            images: Array.from({ length: 3 }, (_, i) => placeholderImage('nonstick frying pan', i)),
-            tags: ['kitchen']
-        },
-        {
-            name: 'Automatic Coffee Maker',
-            price: 59.99,
-            description: '12-Cup Programmable Coffee Machine',
-            images: Array.from({ length: 3 }, (_, i) => placeholderImage('coffee maker', i)),
-            tags: ['kitchen', 'eco-friendly']
-        },
-        {
-            name: 'Air Fryer XL',
-            price: 89.99,
-            description: '5.8QT Large Air Fryer Oven',
-            images: Array.from({ length: 3 }, (_, i) => placeholderImage('air fryer', i)),
-            tags: ['kitchen', 'eco-friendly']
-        },
-        {
-            name: 'Robot Vacuum Cleaner',
-            price: 149.99,
-            description: 'Smart Robotic Vacuum with WiFi',
-            images: Array.from({ length: 3 }, (_, i) => placeholderImage('robot vacuum', i)),
-            tags: ['home', 'cleaning']
-        },
-    ];
-    const beautyHealthProducts = [
-        {
-            name: 'Facial Cleansing Brush',
-            price: 19.99,
-            description: 'Electric facial cleansing brush',
-            images: Array.from({ length: 3 }, (_, i) => placeholderImage('facial cleansing brush', i)),
-            tags: ['beauty', 'skincare']
-        },
-        {
-            name: 'Makeup Brush Set',
-            price: 29.99,
-            description: 'Professional makeup brush set',
-            images: Array.from({ length: 3 }, (_, i) => placeholderImage('makeup brush set', i)),
-            tags: ['beauty', 'makeup']
-        },
-        {
-            name: 'Hair Dryer',
-            price: 39.99,
-            description: '2200W Professional Hair Dryer',
-            images: Array.from({ length: 3 }, (_, i) => placeholderImage('hair dryer', i)),
-            tags: ['beauty', 'haircare']
-        },
-        {
-            name: 'Electric Toothbrush',
-            price: 49.99,
-            description: 'Sonic electric toothbrush with timer',
-            images: Array.from({ length: 3 }, (_, i) => placeholderImage('electric toothbrush', i)),
-            tags: ['beauty', 'oral-care']
-        },
-        {
-            name: 'Skincare Fridge',
-            price: 99.99,
-            description: 'Mini skincare fridge with mirror',
-            images: Array.from({ length: 3 }, (_, i) => placeholderImage('skincare fridge', i)),
-            tags: ['beauty', 'skincare']
-        },
-    ];
-    const toysHobbiesProducts = [
-        {
-            name: 'Remote Control Car',
-            price: 39.99,
-            description: '1:18 Scale Remote Control Car',
-            images: Array.from({ length: 3 }, (_, i) => placeholderImage('remote control car', i)),
-            tags: ['toy', 'hobby']
-        },
-        {
-            name: 'Building Blocks Set',
-            price: 29.99,
-            description: 'Creative building blocks set',
-            images: Array.from({ length: 3 }, (_, i) => placeholderImage('building blocks', i)),
-            tags: ['toy', 'educational']
-        },
-        {
-            name: 'Puzzle Game',
-            price: 19.99,
-            description: '500-piece jigsaw puzzle',
-            images: Array.from({ length: 3 }, (_, i) => placeholderImage('jigsaw puzzle', i)),
-            tags: ['game', 'puzzle']
-        },
-        {
-            name: 'Action Figure',
-            price: 24.99,
-            description: 'Collectible action figure',
-            images: Array.from({ length: 3 }, (_, i) => placeholderImage('action figure', i)),
-            tags: ['toy', 'collectible']
-        },
-        {
-            name: 'Board Game',
-            price: 34.99,
-            description: 'Strategy board game for adults',
-            images: Array.from({ length: 3 }, (_, i) => placeholderImage('board game', i)),
-            tags: ['game', 'strategy']
-        },
-    ];
-    const sportsOutdoorsProducts = [
-        {
-            name: 'Yoga Mat',
-            price: 19.99,
-            description: 'Non-slip yoga mat',
-            images: Array.from({ length: 3 }, (_, i) => placeholderImage('yoga mat', i)),
-            tags: ['fitness', 'yoga']
-        },
-        {
-            name: 'Dumbbell Set',
-            price: 49.99,
-            description: 'Adjustable dumbbell set',
-            images: Array.from({ length: 3 }, (_, i) => placeholderImage('dumbbell set', i)),
-            tags: ['fitness', 'exercise']
-        },
-        {
-            name: 'Treadmill',
-            price: 299.99,
-            description: 'Folding treadmill with incline',
-            images: Array.from({ length: 3 }, (_, i) => placeholderImage('treadmill', i)),
-            tags: ['fitness', 'exercise']
-        },
-        {
-            name: 'Camping Tent',
-            price: 89.99,
-            description: 'Waterproof camping tent',
-            images: Array.from({ length: 3 }, (_, i) => placeholderImage('camping tent', i)),
-            tags: ['outdoor', 'camping']
-        },
-        {
-            name: 'Hiking Backpack',
-            price: 69.99,
-            description: 'Lightweight hiking backpack',
-            images: Array.from({ length: 3 }, (_, i) => placeholderImage('hiking backpack', i)),
-            tags: ['outdoor', 'hiking']
-        },
-    ];
-    const automobilesProducts = [
-        {
-            name: 'Car Phone Mount',
-            price: 9.99,
-            description: 'Universal car phone holder',
-            images: Array.from({ length: 3 }, (_, i) => placeholderImage('car phone mount', i)),
-            tags: ['car', 'accessory']
-        },
-        {
-            name: 'Dash Cam',
-            price: 49.99,
-            description: '1080P Full HD dash cam',
-            images: Array.from({ length: 3 }, (_, i) => placeholderImage('dash cam', i)),
-            tags: ['car', 'accessory']
-        },
-        {
-            name: 'OBD2 Scanner',
-            price: 29.99,
-            description: 'Car diagnostic tool',
-            images: Array.from({ length: 3 }, (_, i) => placeholderImage('OBD2 scanner', i)),
-            tags: ['car', 'accessory']
-        },
-        {
-            name: 'Car Vacuum Cleaner',
-            price: 39.99,
-            description: 'Portable car vacuum cleaner',
-            images: Array.from({ length: 3 }, (_, i) => placeholderImage('car vacuum cleaner', i)),
-            tags: ['car', 'cleaning']
-        },
-        {
-            name: 'Motorcycle Cover',
-            price: 19.99,
-            description: 'Waterproof motorcycle cover',
-            images: Array.from({ length: 3 }, (_, i) => placeholderImage('motorcycle cover', i)),
-            tags: ['motorcycle', 'accessory']
-        },
-    ];
-
-    const createdProducts = [];
-    for (const product of productsData) {
-        createdProducts.push(await prisma.product.create({
+                content: 'Hi! Is the laptop still available?',
+                senderId: users[1].id, // Alice
+                roomId: room1.id
+            }
+        }),
+        prisma.message.create({
             data: {
-                name: product.name,
-                price: product.price,
-                description: product.description,
-                categoryId: product.categoryId,
-                sellerId: product.sellerId,
-                imagesId: {
-                    create: product.images.map((url, i) => ({ url, alt: `${product.name} Image ${i + 1}` })),
-                },
-                tags: {
-                    connectOrCreate: getTagConnect(product.tags || [])
-                }
-            },
-        }));
-    }
+                content: 'Yes, it is! Would you like to know more about it?',
+                senderId: users[2].id, // Bob
+                roomId: room1.id
+            }
+        }),
+        prisma.message.create({
+            data: {
+                content: 'Great! Can you tell me about the warranty?',
+                senderId: users[1].id, // Alice
+                roomId: room1.id
+            }
+        }),
+        prisma.message.create({
+            data: {
+                content: 'Hello! I\'m interested in the camping tent.',
+                senderId: users[3].id, // Carol
+                roomId: room2.id
+            }
+        }),
+        prisma.message.create({
+            data: {
+                content: 'Hi Carol! The tent is perfect for 4 people and very easy to set up.',
+                senderId: users[4].id, // David
+                roomId: room2.id
+            }
+        })
+    ]);
 
-    for (const group of [
-        { products: homeKitchenProducts, categoryIdx: 0, tags: ['kitchen', 'eco-friendly'] },
-        { products: beautyHealthProducts, categoryIdx: 1, tags: ['beauty'] },
-        { products: toysHobbiesProducts, categoryIdx: 2, tags: ['gaming', 'outdoor'] },
-        { products: sportsOutdoorsProducts, categoryIdx: 3, tags: ['fitness', 'outdoor'] },
-        { products: automobilesProducts, categoryIdx: 4, tags: ['car', 'accessory'] },
-    ]) {
-        for (const product of group.products) {
-            await prisma.product.create({
-                data: {
-                    name: product.name,
-                    price: product.price,
-                    description: product.description,
-                    categoryId: createdCategories[group.categoryIdx].id,
-                    sellerId: alice.id,
-                    imagesId: {
-                        create: product.images.map((url, i) => ({ url, alt: `${product.name} Image ${i + 1}` })),
-                    },
-                    tags: {
-                        connectOrCreate: getTagConnect(product.tags || group.tags)
-                    }
-                },
-            });
-        }
-    }
+    console.log(`✅ Created ${messages.length} messages in 2 chat rooms`);
 
-    // Faker-based product seeding
-    async function seedFakerProducts(
-        category: { id: string },
-        seller: { id: string },
-        count: number = 20,
-        tagPool: string[] = []
-    ) {
-        for (let i = 0; i < count; i++) {
-            const name = faker.commerce.productName();
-            const price = parseFloat(faker.commerce.price({ min: 10, max: 1000 }));
-            const description = faker.commerce.productDescription();
-            const keyword = name.split(' ')[0];
-            const images = Array.from({ length: faker.number.int({ min: 2, max: 5 }) }, (_, j) => placeholderImage(keyword, j));
-            const tags = faker.helpers.arrayElements(tagPool, faker.number.int({ min: 1, max: 3 }));
-            await prisma.product.create({
-                data: {
-                    name,
-                    price,
-                    description,
-                    categoryId: category.id,
-                    sellerId: seller.id,
-                    imagesId: {
-                        create: images.map((url, k) => ({ url, alt: `${name} Image ${k + 1}` })),
-                    },
-                    tags: {
-                        connectOrCreate: getTagConnect(tags)
-                    }
-                },
-            });
-        }
-    }
+    // Create Announcements
+    const announcements = await Promise.all([
+        prisma.anoouncement.create({
+            data: {
+                message: 'Welcome to ShopQuest! Explore our amazing products.',
+                type: 'INFO'
+            }
+        }),
+        prisma.anoouncement.create({
+            data: {
+                message: 'Flash Sale: 20% off on all electronics this weekend!',
+                type: 'SUCCESS'
+            }
+        }),
+        prisma.anoouncement.create({
+            data: {
+                message: 'Scheduled maintenance tonight from 2-4 AM EST.',
+                type: 'WARNING'
+            }
+        })
+    ]);
 
-    // Example usage after categories and users are created:
-    await seedFakerProducts(electronics, alice, 20, ['wireless', 'smart', 'gaming', 'portable']);
-    await seedFakerProducts(fashion, bob, 20, ['fashion', 'accessory', 'fitness', 'outdoor']);
-    if (createdCategories.length >= 5) {
-        await seedFakerProducts(createdCategories[0], alice, 20, ['kitchen', 'eco-friendly']); // Home & Kitchen
-        await seedFakerProducts(createdCategories[1], bob, 20, ['beauty', 'skincare']); // Beauty & Health
-        await seedFakerProducts(createdCategories[2], alice, 20, ['gaming', 'outdoor']); // Toys & Hobbies
-        await seedFakerProducts(createdCategories[3], bob, 20, ['fitness', 'outdoor']); // Sports & Outdoors
-        await seedFakerProducts(createdCategories[4], alice, 20, ['car', 'accessory']); // Automobiles & Motorcycles
-    }
+    console.log(`✅ Created ${announcements.length} announcements`);
+
+    console.log('🎉 Database seeding completed successfully!');
 }
 
 main()
     .catch((e) => {
-        console.error(e)
-        process.exit(1)
+        console.error('❌ Error during seeding:', e);
+        process.exit(1);
     })
     .finally(async () => {
-        await prisma.$disconnect()
-    })
+        await prisma.$disconnect();
+    });

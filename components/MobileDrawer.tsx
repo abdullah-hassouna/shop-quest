@@ -56,7 +56,7 @@ function MobileDrawer({ user, isMobileMenuOpen, handleSearch, searchQuery, setSe
                             </Avatar>
                         </div>
                         <div className='ml-3'>
-                            <div className='text-base font-medium bg-gradient-to-r from-purple-600 via-pink-500 to-red-500 bg-clip-text text-transparent'>
+                            <div className='text-base font-medium bg-gradient-to-r from-purple-600 via-pink-500 to-primary bg-clip-text text-transparent'>
                                 {user.name}
                             </div>
                             <div className='text-sm font-medium text-gray-500'>

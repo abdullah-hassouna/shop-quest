@@ -40,7 +40,7 @@ export function ColorPicker({
                         "w-full px-3 py-2 text-left border rounded-md shadow-sm",
                         "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500",
                         "flex items-center justify-between",
-                        error ? "border-red-500" : "border-gray-300"
+                        error ? "border-primary" : "border-gray-300"
                     )}
                 >
                     <div className="flex items-center space-x-2">

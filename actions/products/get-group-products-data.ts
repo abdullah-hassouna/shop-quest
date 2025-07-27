@@ -3,10 +3,9 @@
 import prisma from "@/lib/prisma";
 import { GetProductDataResponse } from "@/types/get-data-response";
 
-export const getProductData = async (id: string): Promise<{ productData?: GetProductDataResponse, error?: string }> => {
+export const getGroupProductsData = async (take: number): Promise<{ products?: GetProductDataResponse[], error?: string }> => {
     try {
-        const productData = await prisma.product.findFirst({
-            where: { id },
+        const products = await prisma.product.findMany({
             include: {
                 imagesId: true,
                 seller: {
@@ -35,26 +34,18 @@ export const getProductData = async (id: string): Promise<{ productData?: GetPro
                     }
                 }
             },
+            take
         })
 
-        if (!productData) {
-            return { error: "Product not found." };
+        if (!products || products.length === 0) {
+            return { error: "No products found." };
         }
 
-        const reviews = productData?.Review || [];
-        let averageRating = 0;
-
-        if (reviews.length === 0) {
-        } else {
-            const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
-            averageRating = totalRating / reviews.length;
-        }
-
-        return { productData: { ...productData, averageRating } as GetProductDataResponse };
+        return { products: products as GetProductDataResponse[] };
     } catch (error) {
-        console.error("Error fetching product data:", error);
+        console.error("Error fetching group product data:", error);
         return {
-            error: "Failed to fetch product data.",
+            error: "Failed to fetch group product data.",
         };
     }
 }

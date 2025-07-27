@@ -104,29 +104,55 @@ export interface GetOneProductDataAdminResponse {
         image: string
     }
 }
+
 export interface GetProductDataResponse {
-    id: string
-    name: string
-    price: number
-    description: string
+    id: string;
+    name: string;
+    price: number;
+    description: string;
+    categoryId: string;
+    sellerId: string;
+    createdAt: Date;
     imagesId: {
-        id: string,
-        url: string,
-        alt: string,
-    }[]
+        id: string;
+        url: string;
+        alt: string;
+        productId: string;
+        createdAt: Date;
+    }[];
     seller: {
-        id: string,
-        name: string
-    }
+        id: string;
+        name: string;
+        image: string;
+    };
     category: {
-        id: string,
-        name: string,
-        color: string,
-        icon: string
-    }
+        id: string;
+        name: string;
+        description: string;
+        icon: string;
+        color: string;
+        slug: string;
+        createdAt: Date;
+    };
     tags: {
-        id: string,
-        name: string
-    }[]
-    createdAt: Date
+        id: string;
+        name: string;
+    }[];
+    Review?: {
+        id: string;
+        rating: number;
+        comment: string;
+        user: any;
+        createdAt: Date;
+        updatedAt: Date;
+    }[];
+    averageRating: number;
+}
+
+export interface GetCategoryDataResponse {
+    id: string;
+    name: string;
+    slug: string;
+    icon: string | null;
+    color: string | null;
 }
