@@ -11,6 +11,7 @@ import {
 } from './ArrowButtons'
 import useEmblaCarousel from 'embla-carousel-react'
 import '@/style/embla.css'
+import { Avatar } from '../ui/avatar'
 
 type PropType = {
   slides: Image[]
@@ -50,7 +51,7 @@ const ImagesCarousel: React.FC<PropType> = (props) => {
         <div className="embla__container">
           {slides.map((Img, index) => (
             <div className="embla__slide min-w-full p-0 m-0" key={index}>
-              <img src={Img.url} alt={Img.alt || "image of product"} key={Img.id} />
+              <img src={Img.url} alt={Img.alt || "product-image"} />
             </div>
           ))}
         </div>

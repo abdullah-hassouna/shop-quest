@@ -1,9 +1,9 @@
 import Link from 'next/link';
-import { Star } from 'lucide-react';
 import { Button } from './ui/button';
 import { GetProductDataResponse } from '@/types/get-data-response';
 import useCartStore, { CartItem } from '@/store/cart-store';
 import { toast } from 'sonner';
+import { RateStar } from './RateStar';
 
 export default function ProductCard({ product }: { product: GetProductDataResponse }) {
   toast
@@ -19,7 +19,7 @@ export default function ProductCard({ product }: { product: GetProductDataRespon
     toast.success(`${product.name} added to cart!`);
   }
 
-  const reviews = product?.Review || [];
+  const reviews = product?.review || [];
   let averageRating = 0;
 
   if (reviews.length === 0) {
@@ -47,24 +47,7 @@ export default function ProductCard({ product }: { product: GetProductDataRespon
               {product.name}
             </Link>
           </h3>
-          <div className="mt-1 flex items-center">
-            {[...Array(averageRating)].map((_, i) => (
-              <Star
-                key={i}
-                className={`h-5 w-5 text-yellow-400 fill-yellow-400`}
-              />
-            ))}
-
-            {[...Array(5 - averageRating)].map((_, i) => (
-              <Star
-                key={i}
-                className={`h-5 w-5 text-yellow-400`}
-              />
-            ))}
-            <span className="ml-2 text-sm text-gray-500">
-              ({product.Review?.length})
-            </span>
-          </div>
+          <RateStar rating={averageRating} />
         </div>
         <p className="text-sm font-medium text-gray-900">
           {product.price && (

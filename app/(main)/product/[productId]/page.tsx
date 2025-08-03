@@ -58,7 +58,7 @@ export default function ProductDetailPage({
   }, [productId]);
 
 
-  const reviews = product?.Review || [];
+  const reviews = product?.review || [];
   let averageRating = 0;
 
   if (reviews.length === 0) {
@@ -128,7 +128,7 @@ export default function ProductDetailPage({
                 />
               ))}
               <span className="ml-2 text-sm text-gray-500">
-                ({product?.Review?.length})
+                ({product?.review?.length})
               </span>
             </div>
             <div
@@ -181,9 +181,14 @@ export default function ProductDetailPage({
               </Button>
             </div>
           </div>
+          <div>
+            {product?.review?.map((review, ind) => <div key={ind}>
+              <span>{review.user.name}</span>
+              <p className='mt-5'>{review.comment}</p>
+            </div>)}
+          </div>
         </div>
 
-        {/* Related products */}
         {relatedProducts?.length > 0 && (
           <section className='mt-16'>
             <ProductCatalog

@@ -4,6 +4,8 @@ import { Input } from './ui/input';
 import Link from 'next/link';
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { UserDataInterface } from '@/types/user-data-type';
+import { LogOut, Package, Search, ShoppingCart } from 'lucide-react';
+import { AvatarImage } from '@radix-ui/react-avatar';
 
 interface MobileDrawerProps {
     user: UserDataInterface;
@@ -20,75 +22,54 @@ function MobileDrawer({ user, isMobileMenuOpen, handleSearch, searchQuery, setSe
 
     return (isMobileMenuOpen && (
         <div ref={mobileMenuRef} className='md:hidden bg-gray-100'>
-            <div className='px-2 pt-2 pb-3 space-y-1 sm:px-3'>
-                <form onSubmit={handleSearch} className='mb-4'>
-                    <Input
-                        type='text'
-                        placeholder='Search products...'
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className='bg-white  '
-                    />
-                </form>
-
-                <Popover>
-                    <PopoverTrigger>Open</PopoverTrigger>
-                    <PopoverContent>Place content for the popover here.</PopoverContent>
-                </Popover>
-
-
-                <Link
-                    href='/cart'
-                    className='block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-white hover:bg-purple-500'
-                    onClick={handleMenuItemClick}
-                >
-                    Cart
-                </Link>
-            </div>
-            <div className='border-t border-gray-700 pt-4 pb-3'>
-                {user!.email && (
-                    <div className='flex items-center px-5 mb-3'>
-                        <div className='flex-shrink-0'>
-                            <Avatar className='h-8 w-8 border-2 border-gray-700'>
-                                <AvatarFallback>
-                                    {user.name?.split(" ").map((char: string) => char.toLocaleUpperCase()).join("")}
-                                </AvatarFallback>
-                            </Avatar>
-                        </div>
-                        <div className='ml-3'>
-                            <div className='text-base font-medium bg-gradient-to-r from-purple-600 via-pink-500 to-primary bg-clip-text text-transparent'>
-                                {user.name}
-                            </div>
-                            <div className='text-sm font-medium text-gray-500'>
-                                {user?.role}
-                            </div>
-                        </div>
-                    </div>
-                )}
+            <div className='border-b border-gray-700 pt-4 pb-3'>
                 {user!.email ? (
-                    <div className='mt-3 px-2 space-y-1'>
+                    <>
                         <Link
                             href='/profile'
-                            className='block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-white hover:bg-purple-500'
+                            className='block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-white hover:bg-purple-500 cursor-pointer'
                             onClick={handleMenuItemClick}
                         >
-                            Your Profile
+                            <div className='flex items-center px-5 mb-3'>
+                                <div className='flex-shrink-0'>
+
+                                    <Avatar className='h-8 w-8 border-2 border-gray-700'>
+                                        <AvatarImage src={user.image!} alt={user.name!} />
+                                        <AvatarFallback>
+                                            {user.name?.split(" ").map((char: string) => char.toLocaleUpperCase()).join("")}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                </div>
+                                <div className='ml-3'>
+                                    <div className='text-base font-medium '>
+                                        {user.name}
+                                    </div>
+                                    <div className='text-sm font-medium text-gray-500'>
+                                        {user?.role}
+                                    </div>
+                                </div>
+                            </div>
                         </Link>
 
-                        <Link
-                            href='/orders'
-                            className='block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-white hover:bg-purple-500'
-                            onClick={handleMenuItemClick}
-                        >
-                            Orders
-                        </Link>
-                        <button
-                            onClick={handleLogout}
-                            className='block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-white hover:bg-purple-500 w-full text-left cursor-pointer'
-                        >
-                            Log out
-                        </button>
-                    </div>
+                        <div className='mt-3 px-2 space-y-1'>
+                            <Link
+                                href='/orders'
+                                className='flex gap-5 px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-white hover:bg-purple-500'
+                                onClick={handleMenuItemClick}
+                            >
+                                <Package className='h-6 w-6 text-gray-600 hover:text-primary' />
+                                Orders
+
+                            </Link>
+                            <button
+                                onClick={handleLogout}
+                                className='flex gap-5 px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-white hover:bg-purple-500 w-full text-left cursor-pointer'
+                            >
+                                <LogOut className='h-6 w-6 text-gray-600 hover:text-primary' />
+                                Log out
+                            </button>
+                        </div>
+                    </>
                 ) : (
                     <div className='mt-3 px-2 space-y-1'>
                         <Link
@@ -107,8 +88,23 @@ function MobileDrawer({ user, isMobileMenuOpen, handleSearch, searchQuery, setSe
                         </Link>
                     </div>
                 )}
+
+                <div className='mt-3 px-2 space-y-1'>
+                    <Link
+                        href='/cart'
+                        className='flex gap-5 px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-white hover:bg-purple-500'
+                        onClick={handleMenuItemClick}
+                    >
+                        <ShoppingCart className='h-6 w-6 text-gray-600 hover:text-primary' />
+                        Cart
+                    </Link>
+                    <Link href='/search' className="flex gap-5 px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-white hover:bg-purple-500">
+                        <Search className='h-6 w-6 text-gray-600 hover:text-primary' />
+                        Search
+                    </Link>
+                </div>
             </div>
-        </div>
+        </div >
     ))
 }
 

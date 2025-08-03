@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ShoppingCart, User, Menu, X, LogOut, Search, Heart } from 'lucide-react';
+import { ShoppingCart, User, Menu, X, LogOut, Search, Heart, LayoutDashboard, Loader } from 'lucide-react';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -21,7 +21,6 @@ import useUserDataStore, { UserState } from '@/store/user-store';
 import { useAnnouncementStore } from '@/store/announcement-store';
 import { useSocket } from '@/hooks/useSocket';
 import getUserSession from '@/actions/auth/regisreation/get-user-session';
-import { getAnnouncementTypeColor } from '@/lib/utils';
 import MobileDrawer from './MobileDrawer';
 import { useCallAnnouncements } from '@/hooks/useCallAnnouncements';
 
@@ -130,11 +129,13 @@ export default function Navbar() {
                     <div>
 
                     </div>
-                    <div className='flex items-center space-x-6'>
+                    <div className=' max-md:hidden flex items-center space-x-6'>
                         <Link href='/search' className="relative">
                             <Search className='h-6 w-6 text-gray-600 hover:text-primary cursor-pointer' />
                         </Link>
-                        <Heart className='h-6 w-6 text-gray-600 hover:text-primary cursor-pointer' />
+                        {user.role === "ADMIN" && <Link href='/dashboard' className="relative">
+                            <LayoutDashboard className='h-6 w-6 text-gray-600 hover:text-primary cursor-pointer' />
+                        </Link>}
                         <Link href='/cart' className="relative">
                             <ShoppingCart className='h-6 w-6 text-gray-600 hover:text-primary' />
                             {cartItems.length > 0 && (
@@ -143,7 +144,7 @@ export default function Navbar() {
                                 </span>
                             )}
                         </Link>
-                        {isLoading ? <>Loading...</> : ((!user!.email) ? (
+                        {isLoading ? <Loader className='w-6 h-6 animate-spin' /> : ((!user!.email) ? (
                             <Link href='/auth'>
                                 <Button
                                     variant='outline'
@@ -191,12 +192,17 @@ export default function Navbar() {
                                             <span>Orders</span>
                                         </Link>
                                     </DropdownMenuItem>
+                                    <DropdownMenuItem>
+                                        {user.role === "ADMIN" && <Link href='/dashboard' className="relative">
+                                            <LayoutDashboard className='h-6 w-6 text-gray-600 hover:text-primary cursor-pointer' />
+                                        </Link>}
+                                    </DropdownMenuItem>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem
                                         className='cursor-pointer'
                                         onClick={handleLogout}
                                     >
-                                        <LogOut className='mr-2 h-4 w-4' />
+                                        <LogOut className='h-4 w-4' />
                                         <span>Log out</span>
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>

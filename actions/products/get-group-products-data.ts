@@ -17,7 +17,7 @@ export const getGroupProductsData = async (take: number): Promise<{ products?: G
                 },
                 category: true,
                 tags: true,
-                Review: {
+                review: {
                     select: {
                         id: true,
                         rating: true,

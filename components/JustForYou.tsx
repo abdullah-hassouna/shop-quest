@@ -11,7 +11,7 @@ export default function JustForYou({ categories, products }: { categories: GetCa
 
     const filteredProducts =
         activeCategory === 'All'
-            ? products.slice(0, 12)
+            ? products.slice(0, 8)
             : products.filter((product) =>
                 product.category.slug.includes(activeCategory.slice(0, -1).toLowerCase())
             );
@@ -38,8 +38,11 @@ export default function JustForYou({ categories, products }: { categories: GetCa
                         </Button>
                     ))}
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-                    {filteredProducts.map((product) => <ProductCard key={product.id} product={product} />)}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 bg-primary-foreground/30 rounded-xl p-8">
+                    {filteredProducts.length ? filteredProducts.map((product) => <ProductCard key={product.id} product={product} />) :
+                        <div className='col-span-full flex justify-around text-primary'>
+                            <span className='text-xl font-bold'>No product to show</span>
+                        </div>}
                 </div>
             </div>
         </section>

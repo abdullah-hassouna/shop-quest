@@ -138,11 +138,15 @@ export interface GetProductDataResponse {
         id: string;
         name: string;
     }[];
-    Review?: {
+    review?: {
         id: string;
         rating: number;
         comment: string;
-        user: any;
+        user: {
+            id: string,
+            name: string | null,
+            image: string | null,
+        };
         createdAt: Date;
         updatedAt: Date;
     }[];

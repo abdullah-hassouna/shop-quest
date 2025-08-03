@@ -31,9 +31,8 @@ model User {
   OTP            OTP[]
   rooms          Room[]         @relation("RoomUsers")
   roomId         String?
-  Message        Message[]
-
-  Review Review[]
+  review         Review[]
+  message        Message[]
 }
 
 model Account {
@@ -91,20 +90,23 @@ model Image {
 }
 
 model Product {
-  id          String      @id @default(uuid())
-  name        String
-  price       Float
-  description String?
-  imagesId    Image[]
-  categoryId  String?
-  category    Category?   @relation(fields: [categoryId], references: [id])
-  seller      User        @relation(fields: [sellerId], references: [id])
-  sellerId    String
-  orders      OrderItem[]
-  tags        Tag[]       @relation("ProductTags")
-  createdAt   DateTime    @default(now())
-
-  Review Review[]
+  id            String      @id @default(uuid())
+  name          String
+  price         Float
+  description   String?
+  imagesId      Image[]
+  categoryId    String?
+  category      Category?   @relation(fields: [categoryId], references: [id])
+  seller        User        @relation(fields: [sellerId], references: [id])
+  sellerId      String
+  orders        OrderItem[]
+  tags          Tag[]       @relation("ProductTags")
+  review        Review[]
+  reviewsCount  Int         @default(0)
+  averageRating Float       @default(0)
+  stock         Int         @default(0)
+  variants      String?     @default("{}")
+  createdAt     DateTime    @default(now())
 }
 
 model Order {

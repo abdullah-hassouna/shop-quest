@@ -4,7 +4,6 @@ import { getAVGOrdersSales } from '@/actions/admin/order/get-avg-orders-number';
 import { GetAvgOrderSalesDataResponse } from '@/types/get-data-response';
 
 export default function Dashboard() {
-    console.log('Dashboard re-rendering');
 
     let ChartData: GetAvgOrderSalesDataResponse[] = []
 
@@ -12,10 +11,8 @@ export default function Dashboard() {
         try {
             const callAvgOrdersRespone = await getAVGOrdersSales({ from: "january", to: "fabuary" })
             if (callAvgOrdersRespone.success && callAvgOrdersRespone.data) {
-                console.log(callAvgOrdersRespone.data)
             }
             else if (callAvgOrdersRespone.error) {
-                console.log(callAvgOrdersRespone.error)
             }
         } catch (error) {
             console.log(error)

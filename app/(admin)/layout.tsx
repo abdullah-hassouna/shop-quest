@@ -18,40 +18,17 @@ interface LayoutProps {
     children: React.ReactNode;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children }) => {
-
-    function redirectUnauthedUser() {
-        redirect('/', RedirectType.replace);
+export default async function Layout({ children }: LayoutProps) {
+    const { success, sessionExpired, userData } = await getUserSession();
+    if (!userData || !success || sessionExpired || !userData.role.startsWith('ADMIN')) {
+        redirect('/', RedirectType.push);
     }
 
-    const getCurrentUserRole = async () => {
-        try {
-            const { success, sessionExpired, userData } = await getUserSession();
-
-            if (!success || sessionExpired || !userData) {
-                redirectUnauthedUser()
-                return;
-            }
-
-            if (!userData.role.startsWith('ADMIN')) {
-                redirectUnauthedUser()
-                return;
-            }
-
-        } catch (error) {
-            console.error("Error fetching user session:", error);
-            redirectUnauthedUser()
-        }
-    };
-
-    getCurrentUserRole();
-
-
     return (
-        <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+        <main className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
             <div className="hidden relative overflow-hidden border-r bg-muted/40 md:block">
                 <div className="flex fixed w-70 h-full max-h-screen flex-col gap-2">
-                    <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
+                    <header className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
                         <Link href="/" className="flex items-center gap-2 font-semibold">
                             <Package2 className="h-6 w-6" />
                             <span>Admin UI</span>
@@ -64,7 +41,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             <Bell className="h-4 w-4" />
                             <span className="sr-only">Toggle notifications</span>
                         </Button>
-                    </div>
+                    </header>
 
                     <div className="flex-1 overflow-auto py-2">
                         <NavigationContent />
@@ -110,8 +87,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     {children}
                 </main>
             </div>
-        </div>
+        </main>
     );
 };
-
-export default Layout;

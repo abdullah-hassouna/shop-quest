@@ -18,7 +18,8 @@ export const getProductData = async (id: string): Promise<{ productData?: GetPro
                 },
                 category: true,
                 tags: true,
-                Review: {
+                review: {
+                    take: 3,
                     select: {
                         id: true,
                         rating: true,
@@ -41,7 +42,7 @@ export const getProductData = async (id: string): Promise<{ productData?: GetPro
             return { error: "Product not found." };
         }
 
-        const reviews = productData?.Review || [];
+        const reviews = productData?.review || [];
         let averageRating = 0;
 
         if (reviews.length === 0) {

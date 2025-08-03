@@ -1,14 +1,35 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import ProductCategories from '@/components/ProductCategories';
-import JustForYou from '@/components/JustForYou';
-import TrendyProducts from '@/components/TrendyProducts';
 import { Toaster } from '@/components/ui/sonner';
 import { useEffect, useState } from 'react';
 import { getAllCategoriesData } from '@/actions/categories/get-all-categories';
 import { GetCategoryDataResponse, GetProductDataResponse } from '@/types/get-data-response';
 import { getGroupProductsData } from '@/actions/products/get-group-products-data';
+import dynamic from 'next/dynamic';
+import { Loader } from 'lucide-react';
+
+const ProductCategories = dynamic(
+  () => import('@/components/ProductCategories'),
+  {
+    ssr: false,
+    loading: () => <div className='w-full flex justify-around items-center py-32'><Loader className='w-10 h-10 animate-spin' /></div>
+  })
+
+const JustForYou = dynamic(
+  () => import('@/components/JustForYou'),
+  {
+    ssr: false,
+    loading: () => <div className='w-full flex justify-around items-center py-32'><Loader className='w-10 h-10 animate-spin' /></div>
+  })
+
+const TrendyProducts = dynamic(
+  () => import('@/components/TrendyProducts'),
+  {
+    ssr: false,
+    loading: () => <div className='w-full flex justify-around items-center py-32'><Loader className='w-10 h-10 animate-spin' />
+    </div>
+  })
 
 
 export default function HomePage() {
@@ -27,8 +48,12 @@ export default function HomePage() {
 
 
     const fetchProducts = async () => {
-      const { error, products } = await getGroupProductsData(24);
-      if (products && !error) {
+      const { error, products } = await getGroupProductsData(32);
+      if (error) {
+        console.log(error)
+        return
+      }
+      if (products) {
         setProducts(products);
       }
     };
