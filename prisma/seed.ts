@@ -14,10 +14,6 @@ async function main() {
     await prisma.anoouncement.deleteMany();
     await prisma.oTP.deleteMany();
     await prisma.notification.deleteMany();
-    // await prisma.wishlistItem.deleteMany(); // Add this line
-    // await prisma.wishlist.deleteMany(); // Add this line
-    // await prisma.cartItem.deleteMany(); // Add this line
-    // await prisma.cart.deleteMany(); // Add this line
     await prisma.orderItem.deleteMany();
     await prisma.order.deleteMany();
     await prisma.image.deleteMany();

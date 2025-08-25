@@ -1,11 +1,11 @@
-// prisma/schema.prisma
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./data/dev.db"
+  provider = "postgresql"  // Changed from sqlite to postgresql
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")  // Add this line for Neon
 }
 
 enum Role {
