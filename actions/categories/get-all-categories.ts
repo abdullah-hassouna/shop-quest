@@ -3,7 +3,7 @@
 import prisma from "@/lib/prisma";
 import { GetCategoryDataResponse } from "@/types/get-data-response";
 
-export const getAllCategoriesData = async (take: number): Promise<{ categoriesData?: GetCategoryDataResponse[], error?: string }> => {
+export const getAllCategoriesData = async (take?: number): Promise<{ categoriesData?: GetCategoryDataResponse[], error?: string }> => {
     try {
         const categoriesData = await prisma.category.findMany({
             select: {
@@ -13,7 +13,7 @@ export const getAllCategoriesData = async (take: number): Promise<{ categoriesDa
                 color: true,
                 slug: true
             },
-            take
+            take: take || undefined,
         })
 
         console.log(categoriesData)

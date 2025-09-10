@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { ShoppingCart, ArrowLeft, Star } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { getProductData } from '@/actions/products/get-prodcut-data';
-import ProductCatalog from '@/components/ProductCategory';
-import { getRelatedProducts } from '@/actions/products/get-related-products';
-import { toast } from 'sonner';
-import { ProductInterface } from '@/types/product-type';
-import ImagesCarousel from '@/components/carousel/ImagesEmblaCarousel';
-import { GetProductDataResponse } from '@/types/get-data-response';
-import useCartStore, { CartItem } from '@/store/cart-store';
-import { Input } from '@/components/ui/input';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { ShoppingCart, ArrowLeft, Star } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { getProductData } from "@/actions/products/get-prodcut-data";
+import ProductCatalog from "@/components/ProductCategory";
+import { getRelatedProducts } from "@/actions/products/get-related-products";
+import { toast } from "sonner";
+import { ProductInterface } from "@/types/product-type";
+import ImagesCarousel from "@/components/Carousel/ImagesEmblaCarousel";
+import { GetProductDataResponse } from "@/types/get-data-response";
+import useCartStore, { CartItem } from "@/store/cart-store";
+import { Input } from "@/components/ui/input";
 
 export default function ProductDetailPage({
   params: paramsPromise,
@@ -22,7 +22,9 @@ export default function ProductDetailPage({
   const [productId, setProductId] = useState<string | null>(null);
   const [productQuantity, setProductQuantity] = useState<number>(1);
   const [product, setProduct] = useState<GetProductDataResponse | null>(null);
-  const [relatedProducts, setRelatedProducts] = useState<ProductInterface[]>([]);
+  const [relatedProducts, setRelatedProducts] = useState<ProductInterface[]>(
+    []
+  );
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
@@ -40,15 +42,18 @@ export default function ProductDetailPage({
 
       try {
         const { productData } = await getProductData(productId);
+        console.log(productData);
         setProduct(productData as GetProductDataResponse);
 
         if (productData) {
-          const { relatedProducts } = await getRelatedProducts(productData as unknown as ProductInterface);
-          console.log(relatedProducts)
-          setRelatedProducts(_ => relatedProducts as ProductInterface[]);
+          const { relatedProducts } = await getRelatedProducts(
+            productData as unknown as ProductInterface
+          );
+          console.log(relatedProducts);
+          setRelatedProducts((_) => relatedProducts as ProductInterface[]);
         }
       } catch (error) {
-        console.error('Failed to fetch product details:', error);
+        console.error("Failed to fetch product details:", error);
       } finally {
         setIsLoading(false);
       }
@@ -56,7 +61,6 @@ export default function ProductDetailPage({
 
     fetchData();
   }, [productId]);
-
 
   const reviews = product?.review || [];
   let averageRating = 0;
@@ -74,44 +78,46 @@ export default function ProductDetailPage({
         name: product.name,
         price: product.price,
         quantity: productQuantity,
-        image: product.imagesId ? product.imagesId[0].url : '',
+        image: product.imagesId ? product.imagesId[0].url : "",
       };
       useCartStore.getState().addToCart(cartItem);
       toast.success(`${product.name} added to cart!`);
-    };
+    }
 
     if (isLoading) {
       return (
-        <div className=' flex items-center justify-center'>
-          <div className='animate-spin rounded-full h-10 w-10 border-b-2 border-purple-900'>Loading</div>
+        <div className=" flex items-center justify-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-900">
+            Loading
+          </div>
         </div>
       );
     }
-  }
+  };
 
   return (
-    <div className='min-h-screen'>
-      <main className='container mx-auto px-4 py-8'>
+    <div className="min-h-screen">
+      <main className="container mx-auto px-4 py-8">
         <button
-          className='mb-8 flex items-center text-purple-500 hover:text-purple-600 transition-colors duration-300 cursor-pointer'
+          className="mb-8 flex items-center text-purple-500 hover:text-purple-600 transition-colors duration-300 cursor-pointer"
           onClick={() => router.back()}
         >
-          <ArrowLeft className='mr-2 h-5 w-5' />
+          <ArrowLeft className="mr-2 h-5 w-5" />
           Back
         </button>
 
-        <div className='grid md:grid-cols-2 gap-8'>
-          <div className='relative overflow-hidden rounded-lg '>
+        <div className="grid md:grid-cols-2 gap-8">
+          <div className="relative overflow-hidden rounded-lg ">
             <ImagesCarousel slides={product?.imagesId ?? []} />
           </div>
 
-          <div className='space-y-6'>
-            <h1 className='text-3xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-primary bg-clip-text text-transparent'>
-              {product?.name || 'Product Title'}
+          <div className="space-y-6">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-primary bg-clip-text text-transparent">
+              {product?.name || "Product Title"}
             </h1>
 
-            <p className='text-xl font-semibold text-gray-700'>
-              ${product?.price?.toFixed(2) || ''}
+            <p className="text-xl font-semibold text-gray-700">
+              ${product?.price?.toFixed(2) || ""}
             </p>
             <div className="mt-1 flex items-center">
               {[...Array(averageRating)].map((_, i) => (
@@ -122,28 +128,23 @@ export default function ProductDetailPage({
               ))}
 
               {[...Array(5 - averageRating)].map((_, i) => (
-                <Star
-                  key={i}
-                  className={`h-5 w-5 text-yellow-400`}
-                />
+                <Star key={i} className={`h-5 w-5 text-yellow-400`} />
               ))}
               <span className="ml-2 text-sm text-gray-500">
                 ({product?.review?.length})
               </span>
             </div>
             <div
-              className='text-gray-500'
+              className="text-gray-500"
               dangerouslySetInnerHTML={{
-                __html:
-                  product?.description || '',
+                __html: product?.description || "",
               }}
             />
 
-            <div className='flex space-x-4'>
-
+            <div className="flex space-x-4">
               <div className="inline-flex justify-between items-center border border-gray-300 rounded-md overflow-hidden w-32 select-none bg-gray-50 font-sans">
                 <Button
-                  onClick={() => setProductQuantity(q => Math.max(1, q - 1))}
+                  onClick={() => setProductQuantity((q) => Math.max(1, q - 1))}
                   className="bg-gray-200 px-3 py-2 text-lg font-bold text-gray-700 hover:bg-gray-300 transition-colors"
                   aria-label="Decrease quantity"
                 >
@@ -164,7 +165,7 @@ export default function ProductDetailPage({
                   aria-label="Quantity input"
                 />
                 <Button
-                  onClick={() => setProductQuantity(q => Math.min(99, q + 1))}
+                  onClick={() => setProductQuantity((q) => Math.min(99, q + 1))}
                   className="bg-gray-200 px-3 py-2 text-lg font-bold text-gray-700 hover:bg-gray-300 transition-colors"
                   aria-label="Increase quantity"
                 >
@@ -173,26 +174,28 @@ export default function ProductDetailPage({
               </div>
 
               <Button
-                className='w-52 bg-gradient-to-r from-purple-500 via-pink-500 to-primary hover:from-purple-600 hover:via-pink-600 hover:to-red-600 text-white font-semibold cursor-pointer'
+                className="w-52 bg-gradient-to-r from-purple-500 via-pink-500 to-primary hover:from-purple-600 hover:via-pink-600 hover:to-red-600 text-white font-semibold cursor-pointer"
                 onClick={handleAddToCart}
               >
-                <ShoppingCart className='mr-2 h-5 w-5' />
+                <ShoppingCart className="mr-2 h-5 w-5" />
                 Add to Cart
               </Button>
             </div>
           </div>
           <div>
-            {product?.review?.map((review, ind) => <div key={ind}>
-              <span>{review.user.name}</span>
-              <p className='mt-5'>{review.comment}</p>
-            </div>)}
+            {product?.review?.map((review, ind) => (
+              <div key={ind}>
+                <span>{review.user.name}</span>
+                <p className="mt-5">{review.comment}</p>
+              </div>
+            ))}
           </div>
         </div>
 
         {relatedProducts?.length > 0 && (
-          <section className='mt-16'>
+          <section className="mt-16">
             <ProductCatalog
-              title='related products'
+              title="related products"
               category={undefined}
               products={relatedProducts as unknown as ProductInterface[]}
             />
