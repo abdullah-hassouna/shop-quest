@@ -1,33 +1,47 @@
-import type { Product } from "@prisma/client";
-import prisma from '@/lib/prisma';
-import { uploadNewProductImage } from "@/actions/cloudinary/upload-image";
-import { Images } from "lucide-react";
+"use server";
+
+import prisma from "@/lib/prisma";
 
 export async function addNewProductAction(newProductData: {
-    name: string,
-    price: number,
-    description: string,
-    category: string,
-    tags: string[],
-    images: {
-        id: number;
-        file: File;
-        name: string;
-        size: number;
-        url: string;
-    }[]
+  seller: string;
+  stock: number;
+  variants: string;
+  name: string;
+  price: number;
+  description: string;
+  category: string;
+  tags: string[];
+  images: string[];
 }) {
-    let imageFiles = []
-    if (newProductData.images.length == 0) return
-    console.log("first")
-
-    imageFiles = newProductData.images.map(img => img.file)
-    const uploadedImages = await uploadNewProductImage(imageFiles)
-    console.log(uploadedImages)
-
-    // const newProduct = prisma.product.create({
-    //     data: {
-
+  try {
+    // const imagesInput = newProductData.images
+    //   ? {
+    //       connect: newProductData.images
+    //         .filter((img) => img.id)
+    //         .map((img) => ({ id: img.id!.toString() })),
     //     }
-    // })
+    //   : undefined;
+
+    const newProductDataFormed = {
+      name: newProductData.name,
+      price: newProductData.price,
+      stock: newProductData.stock,
+      description: newProductData.description,
+      seller: { connect: { id: newProductData.seller } },
+      category: { connect: { id: newProductData.category } },
+      tags: { connect: newProductData.tags.map((tagId) => ({ id: tagId })) },
+      imagesId: {
+        connect: newProductData.images.map((imageid) => ({ id: imageid })),
+      },
+      variants: JSON.stringify(newProductData.variants),
+    };
+
+    const newProduct = prisma.product.create({
+      data: newProductDataFormed,
+    });
+
+    return { success: true, data: newProduct, error: null };
+  } catch (err) {
+    return { success: false, data: null, error: "Server Error" };
+  }
 }

@@ -8,7 +8,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import React, { ReactNode } from "react";
-import AddNewProductForm from "../data-form/add-new-product";
+import { AddNewProductForm } from "../data-form/add-new-product";
+import { newProductValidation } from "@/validation/product-validation";
 
 interface AddNewProductProps {
   children: ReactNode;
@@ -30,7 +31,7 @@ function AddNewProductDialog({
         <DialogHeader className="mb-6">
           <DialogTitle className="text-2xl">Add New Product Info</DialogTitle>
         </DialogHeader>
-        <AddNewProductForm />
+        <AddNewProductForm validationSchema={newProductValidation} />
       </DialogContent>
     </Dialog>
   );
